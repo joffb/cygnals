@@ -13,24 +13,24 @@ The "Speeds" tempo mode (with separate Speed 1 and Speed 2 parameters) is suppor
 
 ## Effects
 
-00 - Arpeggio (*)
-01 - Slide up
-02 - Slide down
-03 - Portamento
-04 - Vibrato (*)
-08 - Set Panning
-09 - Set Speed 1
-0B - Jump to Pattern
-0D - Jump to Next Pattern (parameter ignored)
-0F - Set Speed 2
-10 - Set Waveform
-11 - Set Noise Mode
-20 - Set Speaker Loudness
-80 - Set Panning
-81 - Set Panning (left channel)
-82 - Set Panning (right channel)
-EC - Note Cut
-ED - Note Delay
++ 00 - Arpeggio (*)
++ 01 - Slide up
++ 02 - Slide down
++ 03 - Portamento
++ 04 - Vibrato (*)
++ 08 - Set Panning
++ 09 - Set Speed 1
++ 0B - Jump to Pattern
++ 0D - Jump to Next Pattern (parameter ignored)
++ 0F - Set Speed 2
++ 10 - Set Waveform
++ 11 - Set Noise Mode
++ 20 - Set Speaker Loudness
++ 80 - Set Panning
++ 81 - Set Panning (left channel)
++ 82 - Set Panning (right channel)
++ EC - Note Cut
++ ED - Note Delay
 
 (*) Arpeggio and Vibrato share memory and only one of them can be used at one time on a given channel
 
