@@ -1025,7 +1025,7 @@ def main(data):
             sample = {
                 'length': 0,
                 'name': "",
-                'compatability_rate': 0,
+                'compatibility_rate': 0,
                 'c4_rate': 0,
                 'depth': 0,
                 'data': []
@@ -1045,7 +1045,7 @@ def main(data):
                 sample['name'] += chr(read_byte)
 
             sample['length'] = struct.unpack("<I", data[sample_pointer:sample_pointer + 4])[0]
-            sample['compatability_rate'] = struct.unpack("<I", data[sample_pointer + 4:sample_pointer + 8])[0]
+            sample['compatibility_rate'] = struct.unpack("<I", data[sample_pointer + 4:sample_pointer + 8])[0]
             sample['c4_rate'] = struct.unpack("<I", data[sample_pointer + 8:sample_pointer + 12])[0]
             sample['depth'] = data[sample_pointer + 12]
             sample['loop direction'] = data[sample_pointer + 13]

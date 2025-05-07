@@ -87,7 +87,7 @@ def resample(sample, note):
     new_sample = {
         'length': 0,
         'name': sample["name"],
-        'compatability_rate': sample["compatability_rate"],
+        'compatibility_rate': sample["compatibility_rate"],
         'c4_rate': sample["c4_rate"],
         'depth': sample["depth"],
         'flags': sample["flags"],
@@ -212,6 +212,8 @@ def main(argv=None):
             ratio = c4_rate/new_rate
             data = []
             ptr = 0
+
+            print(" * sample " + str(i) + " resampling from " + str(c4_rate) + "hz to " + str(new_rate) + "hz")
             
             while (ptr < sample["length"]):
                 data.append(sample["data"][math.floor(ptr)])
@@ -220,15 +222,24 @@ def main(argv=None):
             sample["length"] = len(data)
             sample["data"] = data
             sample["c4_rate"] = new_rate
-            sample["compataility_rate"] = new_rate
+            sample["compatibility_rate"] = new_rate
 
         # convert 16-bit to 8-bit
         if sample["depth"] == 16:
 
-            print("converting from 16 bit sample to 8 bit sample")
+            print(" * sample " + str(i) + " converting from 16 bit sample to 8 bit sample")
 
-            for i in range (0, len(sample["data"])):
-                sample["data"][i] = sample["data"][i] >> 8
+            for j in range (0, len(sample["data"])):
+                sample["data"][j] = sample["data"][j] >> 8
+
+        # warn for 24000hz samples
+        if sample["c4_rate"] == 24000:
+            print(" * mono warning: sample " + str(i) + " rate is 24000hz and will not play on mono")
+
+        # warn for big samples
+        if sample["length"] > 65536:
+            print(" * mono warning: sample " + str(i) + " length is > 64kb (" + str(sample["length"]) + " bytes) and will not loop properly on mono")
+
 
     # process instruments
     instruments = []
