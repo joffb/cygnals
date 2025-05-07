@@ -211,6 +211,8 @@ var structs = [
 // output define file
 let out_sdas = fs.openSync("include/cygnals.h", "w+");
 
+fs.writeSync(out_sdas, "// Cygnals - Joe Kennedy 2025\n\n")
+
 fs.writeSync(out_sdas, "#ifndef _SOUND_DEFINES_H\n");
 fs.writeSync(out_sdas, "#define _SOUND_DEFINES_H\n\n");
 

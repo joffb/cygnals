@@ -1,3 +1,5 @@
+// Cygnals - Joe Kennedy 2025
+
 #ifndef _SOUND_DEFINES_H
 #define _SOUND_DEFINES_H
 

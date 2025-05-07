@@ -1,3 +1,6 @@
+
+# Cygnals - Joe Kennedy 2025
+
 #include <wonderful.h>
 #include <ws.h>
 #include "cygnals.h"
