@@ -10,6 +10,7 @@
 .global sound_sample_note_on
 .global sound_sample_note_off
 .global sound_sample_ptr
+.global sound_calc_sample_voice_volume
 
 .data
 
@@ -171,6 +172,9 @@ sound_sample_update_interrupt:
 #
 # ah - sample number
 sound_sample_note_on:
+
+    # set note-on
+    or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_NOTE_ON
 
     # running in colour mode?
     in al, IO_SYSTEM_CTRL2
@@ -358,6 +362,9 @@ sound_sample_note_off:
 
     # clear sample playing flag
     and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_SAMPLE_PLAYING
+
+    # clear note-on
+    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_NOTE_ON
 
     # running in colour mode?
     in al, IO_SYSTEM_CTRL2

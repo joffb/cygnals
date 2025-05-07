@@ -241,7 +241,7 @@ sunl_slide_up:
     or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_SLIDE_UP
 
     # get slide amount
-    mov [si + CHANNEL_SLIDE_AMOUNT], ah
+    mov [si + CHANNEL_ARP_VIB_POS], ah
 
     # move on command pointer
     add bx, 2
@@ -261,7 +261,7 @@ sunl_slide_down:
     or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_SLIDE_DOWN
 
     # get slide amount
-    mov [si + CHANNEL_SLIDE_AMOUNT], ah
+    mov [si + CHANNEL_ARP_VIB_POS], ah
 
     # move on command pointer
     add bx, 2
@@ -280,7 +280,7 @@ sunl_slide_portamento:
     or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_SLIDE_PORTA
 
     # get slide amount
-    mov [si + CHANNEL_SLIDE_AMOUNT], ah
+    mov [si + CHANNEL_ARP_VIB_POS], ah
 
     # move on command pointer
     add bx, 2

@@ -134,8 +134,11 @@ var structs = [
             { name: "instrument_num", size: "db", csize: "unsigned char" },
             { name: "wavetable_num", size: "db", csize: "unsigned char" },
             
-            { name: "slide_amount", size: "db", csize: "unsigned char", comment: "how much to add/subtract per tic" },
+            //{ name: "slide_amount", size: "db", csize: "unsigned char", comment: "how much to add/subtract per tic" },
+            
+            { name: "wait", size: "db", csize: "unsigned char", comment: "wait for this many lines/tics"},
 
+            // we want these ones to be word aligned!
             { name: "arp_vib_pos", size: "db", csize: "unsigned char" },
             { name: "arp_vib", size: "db", csize: "unsigned char" },
 
@@ -151,9 +154,7 @@ var structs = [
             { name: "arp_macro_pos", size: "db", csize: "unsigned char"},
             { name: "arp_macro_ptr", size: "db", csize: "unsigned char"},
 
-            { name: "wait", size: "db", csize: "unsigned char", comment: "wait for this many lines/tics"},
-
-            { name: "pad", size: "db", csize: "unsigned char"},
+            //{ name: "pad", size: "db", csize: "unsigned char"},
         ]
     },
     {

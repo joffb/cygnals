@@ -164,32 +164,7 @@ chip_channels = {
 macro_word_size_convert = [1, 1, 2, 4]
 macro_word_struct_string = ["B", "b", "<h", "<i"]
 
-def main(argv=None):
-    print("furnace2json - Joe Kennedy 2024")
-
-    parser = OptionParser("Usage: furnace2json.py [options] INPUT_FILE_NAME.FUR")
-    parser.add_option("-o", '--out',        dest='outfilename',                                      help='output file name')
-
-    (options, args) = parser.parse_args()
-
-    if (len(args) == 0):
-        parser.print_help()
-        parser.error("Input file name required\n")
-
-    infilename = Path(args[0])
-    out_filename = Path(options.outfilename) if (options.outfilename) else infilename.with_suffix('.json')
-
-    # open source file
-    try:
-        infile = open(str(infilename), "rb")
-        # read into variable
-        data = infile.read()
-        infile.close()
-    except OSError:
-        print("Error reading input file: " + str(infilename), file=sys.stderr)
-        sys.exit(1)
-
-    print ("Loaded " + str(infilename))
+def main(data):
 
     # file is zlib compressed, decompress it
     if data[0:1].decode("utf-8") == "x":
@@ -995,8 +970,9 @@ def main(argv=None):
                 # advance pointer
                 feature_pointer += feature['length']
 
-
-            if (instrument["type"] == 4) and ("sample" not in instrument) and (song["sample_count"] == 1):
+            # when it's a "Generic Sample" type and the selected sample is 0
+            # it doesn't create a Sample feature, so fill it in
+            if (instrument["type"] == 4) and ("sample" not in instrument) and (song["sample_count"] > 0):
                 
                 instrument["sample"] = { 'initial_sample': 0 }
 
@@ -1103,16 +1079,18 @@ def main(argv=None):
 
             song['samples'].append(sample)
 
-    try:
-        outfile = open(str(out_filename), 'w')
-        # write out json file
-        json.dump(song, outfile, indent=1)
-        outfile.close()
-    except OSError:
-        print ("Error writing to output file: " + str(out_filename), file=sys.stderr)
-        sys.exit(1)
+    return song
 
-    print ("Written output file: " + str(out_filename))
+    #try:
+    #    outfile = open(str(out_filename), 'w')
+        # write out json file
+    #    json.dump(song, outfile, indent=1)
+    #    outfile.close()
+    #except OSError:
+    #    print ("Error writing to output file: " + str(out_filename), file=sys.stderr)
+    #    sys.exit(1)
+
+    #print ("Written output file: " + str(out_filename))
 
 if __name__=='__main__':
     main()

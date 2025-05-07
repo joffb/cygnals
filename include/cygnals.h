@@ -1,5 +1,5 @@
-#ifndef _CYGNALS_H
-#define _CYGNALS_H
+#ifndef _SOUND_DEFINES_H
+#define _SOUND_DEFINES_H
 
 #define STATE_FLAG_PROCESS_NEW_LINE 0x1
 #define STATE_FLAG_LOOP 0x2
@@ -46,7 +46,7 @@ typedef struct {
 	unsigned char volume;
 	unsigned char instrument_num;
 	unsigned char wavetable_num;
-	unsigned char slide_amount;
+	unsigned char wait;
 	unsigned char arp_vib_pos;
 	unsigned char arp_vib;
 	unsigned char ex_macro_pos;
@@ -57,8 +57,6 @@ typedef struct {
 	unsigned char wave_macro_ptr;
 	unsigned char arp_macro_pos;
 	unsigned char arp_macro_ptr;
-	unsigned char wait;
-	unsigned char pad;
 } channel_t;
 
 typedef struct {
@@ -171,7 +169,7 @@ void sound_set_wavetable_ram_address(unsigned char *address);
 	#define CHANNEL_VOLUME 10
 	#define CHANNEL_INSTRUMENT_NUM 11
 	#define CHANNEL_WAVETABLE_NUM 12
-	#define CHANNEL_SLIDE_AMOUNT 13		// how much to add/subtract per tic
+	#define CHANNEL_WAIT 13		// wait for this many lines/tics
 	#define CHANNEL_ARP_VIB_POS 14
 	#define CHANNEL_ARP_VIB 15
 	#define CHANNEL_EX_MACRO_POS 16
@@ -182,9 +180,7 @@ void sound_set_wavetable_ram_address(unsigned char *address);
 	#define CHANNEL_WAVE_MACRO_PTR 21
 	#define CHANNEL_ARP_MACRO_POS 22
 	#define CHANNEL_ARP_MACRO_PTR 23
-	#define CHANNEL_WAIT 24		// wait for this many lines/tics
-	#define CHANNEL_PAD 25
-	#define CHANNEL_SIZE 26
+	#define CHANNEL_SIZE 24
 
 	#define SONG_HEADER_MAGIC_BYTE 0		// should be 0xba for a valid song
 	#define SONG_HEADER_BANK 1

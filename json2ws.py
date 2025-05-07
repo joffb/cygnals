@@ -9,6 +9,8 @@ import math
 from pathlib import Path
 from optparse import OptionParser
 
+import furnace2json
+
 MAGIC_BYTE          = 0xba
 
 NOTE_ON             = 0x00
@@ -116,7 +118,7 @@ def int_def(v, d):
 def main(argv=None):
     print("json2ws - Joe Kennedy 2024")
 
-    parser = OptionParser("Usage: json2ws.py [options] INPUT_FILE_NAME.JSON")
+    parser = OptionParser("Usage: json2ws.py [options] INPUT_FILE_NAME.FUR")
     parser.add_option("-o", '--out',        dest='outfilename',                                      help='output file name')
     parser.add_option("-i", '--identifier', dest='identifier',                                       help='source identifier')
     parser.add_option("-s", "--sfx",        dest='sfx',                               default="-1",  help='SFX channel')
@@ -124,13 +126,14 @@ def main(argv=None):
     parser.add_option("-b", '--bank',       dest='bank',                                             help='BANK number')
     parser.add_option("-a", '--area',       dest='area',                                             help='AREA name')
 
+    parser.add_option("-j", '--json',       dest='jsonexport',                         default="",    help='json debug export file name')
+
+
     (options, args) = parser.parse_args()
 
     if (len(args) == 0):
         parser.print_help()
         parser.error("Input file name required\n")
-
-    infilename = Path(args[0])
 
     song_flags = STATE_FLAG_PLAYING | STATE_FLAG_PROCESS_NEW_LINE
 
@@ -155,25 +158,36 @@ def main(argv=None):
         sfx_channel = 0x4f
 
     in_filename = Path(args[0])
-    out_filename = Path(options.outfilename) if (options.outfilename) else infilename.with_suffix('.c')
-    song_prefix = options.identifier if (options.identifier) else str(Path(infilename.name).with_suffix(''))
+    out_filename = Path(options.outfilename) if (options.outfilename) else in_filename.with_suffix('.s')
+    song_prefix = options.identifier if (options.identifier) else str(Path(in_filename.name).with_suffix(''))
 
     # try to load json file
     try:
-        infile = open(str(in_filename), "r")
+
         # read into variable
-        json_text = infile.read()
+        infile = open(str(in_filename), "rb")
+        fur_data = infile.read()
         infile.close()
+
+        # parse into song object
+        song = furnace2json.main(fur_data)
+
+        # export to json file if file specified
+        if options.jsonexport != "":
+            jsonout = open(options.jsonexport, "w")
+            json.dump(song, jsonout, indent=1)
+            jsonout.close()
+
     except OSError:
         print("Error reading input file: " + str(in_filename), file=sys.stderr)
         sys.exit(1)
 
     # try to parse json
-    try:
-        song = json.loads(json_text)
-    except ValueError:
-        print("File is not a valid json file: " + in_filename, file=sys.stderr)
-        sys.exit(1)
+    #try:
+    #    song = json.loads(json_text)
+    #except ValueError:
+    #    print("File is not a valid json file: " + in_filename, file=sys.stderr)
+    #    sys.exit(1)
 
     # process samples
     for i in range(0, len(song["samples"])):
@@ -662,6 +676,12 @@ def main(argv=None):
                 def run_end(run_length, pattern_bin_rle):
 
                     if (run_length > 0):
+
+                        if run_length > 127:
+                            while run_length > 127:
+                                pattern_bin_rle.append("(" + str(END_LINE) + " | " + str(127) + ")")
+                                run_length = run_length - 127
+
                         pattern_bin_rle.append("(" + str(END_LINE) + " | " + str(run_length - 1) + ")")
 
 

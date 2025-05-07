@@ -27,7 +27,7 @@ sound_update_slide:
     jnz sus_not_slide_up
 
         # add slide amount to frequency
-        mov al, [si + CHANNEL_SLIDE_AMOUNT]
+        mov al, [si + CHANNEL_ARP_VIB_POS]
         xor ah, ah
         add bx, ax
 
@@ -52,7 +52,7 @@ sound_update_slide:
     jnz sus_not_slide_down
 
         # subtract slide amount from frequency
-        mov al, [si + CHANNEL_SLIDE_AMOUNT]
+        mov al, [si + CHANNEL_ARP_VIB_POS]
         xor ah, ah
         sub bx, ax
 
@@ -80,7 +80,7 @@ sound_update_slide:
 
             # target is above
             # subtract slide amount from frequency
-            mov dl, [si + CHANNEL_SLIDE_AMOUNT]
+            mov dl, [si + CHANNEL_ARP_VIB_POS]
             xor dh, dh
             add bx, dx
 
@@ -97,7 +97,7 @@ sound_update_slide:
 
             # target is below
             # subtract slide amount from frequency
-            mov dl, [si + CHANNEL_SLIDE_AMOUNT]
+            mov dl, [si + CHANNEL_ARP_VIB_POS]
             xor dh, dh
             sub bx, dx
 

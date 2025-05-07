@@ -18,6 +18,26 @@
 # cx - channel flags
 sound_update_channel_volume:
 
+	# sample playing?
+	# sample channel?
+	test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+	jz sucv_no_sample
+
+		cmp byte ptr [si + CHANNEL_NUMBER], 1
+		jnz sucv_no_sample
+
+			# get new volume and update chip
+			push cx
+			call sound_calc_sample_voice_volume
+			out IO_SND_VOL_CH2_VOICE, al
+			pop cx
+
+			ret
+
+	sucv_no_sample:
+
+	# wavetable voice
+
 	# get volume
 	mov al, [si + CHANNEL_VOLUME]
 

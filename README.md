@@ -14,9 +14,9 @@ The "Speeds" tempo mode (with separate Speed 1 and Speed 2 parameters) is suppor
 ## Effects
 
 + 00 - Arpeggio (*)
-+ 01 - Slide up
-+ 02 - Slide down
-+ 03 - Portamento
++ 01 - Slide up (*)
++ 02 - Slide down (*)
++ 03 - Portamento (*)
 + 04 - Vibrato (*)
 + 08 - Set Panning
 + 09 - Set Speed 1
@@ -32,10 +32,10 @@ The "Speeds" tempo mode (with separate Speed 1 and Speed 2 parameters) is suppor
 + EC - Note Cut
 + ED - Note Delay
 
-(*) Arpeggio and Vibrato share memory and only one of them can be used at one time on a given channel
+(*) Arpeggio, Slides, Portamento and Vibrato share memory and only one of them can be used at one time on a given channel
 
 ## Macros
-Volume, Arpeggio, Wave, Pitch and Noise Macros can be used in Sequence mode (ADSR and LFO modes are not supported).
+Volume, Arpeggio, Wave, Pitch and Noise Macros can be used in Sequence mode - ADSR and LFO modes are not supported.
 
 Volume, Arpeggio and Wave Macros can all be used simultaneously.
 Pitch and Noise macros share memory and only one can be used at a time.
@@ -47,6 +47,32 @@ Wave macros which are only 1 entry long will not be run as macros and will inste
 Your makefile should be updated to add `-lcygnals` to the list of libraries on the line starting with `LIBS := `
 
 The `build/wswan/medium/libcygnals.a` file should be placed in `/opt/wonderful/target/wswan/medium/lib/` and the `cygnals.h` should be in your project include directory.
+
+### Converting
+
+You can convert a furnace song into an assembly language file as below:
+
+```
+python3 json2ws.py -o src/mysong.s -i mysong ./song.fur
+```
+
+In this example, `-o` sets the output filename, `-i` sets the name of the variable which can be used to refer to the song, and the input furnace filename comes last.
+
+You can convert a sound effect as below:
+
+```
+python3 ../json2ws.py --sfx 2 -o src/mysfx.s -i mysfx ./mysfx.fur 
+```
+
+The main difference here is `--sfx 2` which tells the converter to only look at channel 2 (indexed starting at 1). You can specify multiple channels like `--sfx 124` will export channels 1, 3 and 4.
+
+### Variables
+
+Use extern variable definitions as below to refer to the song data.
+
+```
+extern const unsigned char __far mysong[];
+```
 
 For playback you will need to make variables for the song's state (which contains the current line, pattern, and other information) and for the four channels:
 
@@ -118,21 +144,28 @@ Samples can be played back on both Mono and Colour Wonderswans.
 
 Samples can be one-shot or looped. When looping is enabled, the entire sample will loop i.e. it is not possible to loop sub-regions of the sample.
 
-NB: Most effects other than Note Cut and Note Delay will not work on Samples.
+Samples can be played back at one of four sample rates: 24000hz (Colour only), 12000hz, 6000hz or 4000hz. Samples which are not at one of these sample rates are first resampled to the nearest compatible rate.
 
-When creating an instrument in Furnace which uses samples:
-+ use the "WonderSwan" instrument type (not "Generic Sample")
-+ the "Use Sample" checkbox should be ticked on the Sample tab
-+ the desired sample should be selected in the dropdown box on the Sample tab
+### Effect compatibility
+* Only the Note Cut and Note Delay effects currently work with samples
+* Macros are not currently supported
+* Panning is not currently supported
 
-Samples can be played back at one of four sample rates: 24000hz (Colour only), 12000hz, 6000hz or 4000hz.
+### Sample Instruments
+When creating an instrument in Furnace which uses samples you can either
++ use the "WonderSwan" instrument type
+    + the "Use Sample" checkbox should be ticked on the Sample tab
+    + the desired sample should be selected in the dropdown box on the Sample tab
++ use the "Generic Sample" instrument type
+    + the desired sample should be selected in the dropdown box on the Sample tab
+The "Sample Map" and "Use Wavetable" features are not supported.
 
-Samples which are not at one of these sample rates are first resampled to the nearest compatible rate.
-
+### ROM Usage
 To play back samples at pitches other than the basic C4 pitch, a new copy of the sample must be created which plays back at the correct speed for one of these sample rates. 
 
 This means that playing a sample at the pitches `C-4, D-4, E-4` will result in three slightly different samples in ROM, one for each pitch. The pitch shifted copies will play back at the same sample rate as the original sample. The total number of samples and the size of all of the samples in bytes will be reported by the conversion script.
 
+### Mono vs. Colour Wonderswans
 Depending on whether the Colour Mode Enabled bit of the System Control 2 register is set, samples will be played back using either Sound DMA or HBlank Timer Interrupts.
 
 ### Mono limitations
@@ -140,11 +173,3 @@ Depending on whether the Colour Mode Enabled bit of the System Control 2 registe
 + The interrupt's playback routine will use up a lot more CPU cycles than would be taken using Sound DMA
 + Sample playback rates are limited to 12000hz, 6000hz and 4000hz. 24000hz samples will not play at all.
 + Samples can be a maximum of 64kb in size (this is a driver choice rather than hardware limitation)
-
-TODO:
-
-effects
-    volume/panning for samples
-    20 hardware volume shift change
-    hardware sweep effects?
-    retrigger?
