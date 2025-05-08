@@ -115,7 +115,7 @@ sound_update_slide:
         sus_slide_porta_target_reached:
 
             # clear slide flag
-            and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_SLIDE_PORTA
+            and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_PITCH_EFFECT_MASK
 
             # set freq = target_freq
             # return freq in bx

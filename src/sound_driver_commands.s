@@ -239,7 +239,7 @@ sunl_noise_mode:
 sunl_slide_up:
 
     # set slide flag
-    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_SLIDE_PORTA
+    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_PITCH_EFFECT_MASK
     or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_SLIDE_UP
 
     # get slide amount
@@ -259,7 +259,7 @@ sunl_slide_up:
 sunl_slide_down:
 
     # set slide flag
-    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_SLIDE_PORTA
+    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_PITCH_EFFECT_MASK
     or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_SLIDE_DOWN
 
     # get slide amount
@@ -279,6 +279,7 @@ sunl_slide_down:
 sunl_slide_portamento:
 
     # set slide flag
+    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_PITCH_EFFECT_MASK
     or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_SLIDE_PORTA
 
     # get slide amount
@@ -298,7 +299,7 @@ sunl_slide_portamento:
 sunl_slide_off:
 
     # clear slide flag
-    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_SLIDE_PORTA
+    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_PITCH_EFFECT_MASK
 
     # move on command pointer
     inc bx
@@ -314,7 +315,7 @@ sunl_slide_off:
 sunl_arpeggio:
 
     # set arpeggio flag
-    and byte ptr [si + CHANNEL_FLAGS], ~(CHAN_FLAG_ARPEGGIO | CHAN_FLAG_VIBRATO)
+    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_PITCH_EFFECT_MASK
     or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_ARPEGGIO
 
     # arpeggio amount is in ah, reset phase
@@ -335,7 +336,7 @@ sunl_arpeggio:
 sunl_arpeggio_off:
 
     # clear arpeggio flag
-    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_ARPEGGIO
+    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_PITCH_EFFECT_MASK
 
     # mark pitch as requiring update
     or byte ptr [si + CHANNEL_FLAGS2], CHAN_FLAG2_PITCH_CHANGED
@@ -354,7 +355,7 @@ sunl_arpeggio_off:
 sunl_vibrato:
 
     # set vibrato flag
-    and byte ptr [si + CHANNEL_FLAGS], ~(CHAN_FLAG_ARPEGGIO | CHAN_FLAG_VIBRATO)
+    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_PITCH_EFFECT_MASK
     or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_VIBRATO
 
     # vibrato amount is in ah, reset phase
@@ -375,7 +376,7 @@ sunl_vibrato:
 sunl_vibrato_off:
 
     # clear vibrato flag
-    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_VIBRATO
+    and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_PITCH_EFFECT_MASK
 
     # mark pitch as requiring update
     or byte ptr [si + CHANNEL_FLAGS2], CHAN_FLAG2_PITCH_CHANGED

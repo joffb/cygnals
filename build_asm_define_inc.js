@@ -66,6 +66,7 @@ var asm_defines = [
         { name: "CHAN_FLAG_SLIDE_UP", value: 0x40 },
         { name: "CHAN_FLAG_SLIDE_DOWN", value: 0x80 },
         { name: "CHAN_FLAG_SLIDE_PORTA", value: 0xC0 },
+        { name: "CHAN_FLAG_PITCH_EFFECT_MASK", value: 0xf0},
     ],
     [
         { name: "CHAN_FLAG2_VOLUME_MACRO", value: 0x01 },

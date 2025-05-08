@@ -126,6 +126,7 @@ void sound_set_wavetable_ram_address(unsigned char *address);
 	#define CHAN_FLAG_SLIDE_UP 0x40
 	#define CHAN_FLAG_SLIDE_DOWN 0x80
 	#define CHAN_FLAG_SLIDE_PORTA 0xc0
+	#define CHAN_FLAG_PITCH_EFFECT_MASK 0xf0
 
 	#define CHAN_FLAG2_VOLUME_MACRO 0x1
 	#define CHAN_FLAG2_WAVE_MACRO 0x2
