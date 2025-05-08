@@ -28,7 +28,7 @@ DEFINES		:=
 # ---------
 
 LIBS		:= -lwsx -lws -lcygnals
-LIBDIRS		:= $(WF_ARCH_LIBDIRS)
+LIBDIRS		:= $(WF_ARCH_LIBDIRS) $(WONDERFUL_TOOLCHAIN)/local/cygnals/$(TARGET)
 
 # Build artifacts
 # ---------------

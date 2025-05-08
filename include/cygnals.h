@@ -93,7 +93,7 @@ typedef struct {
 	channel_t * channels_ptr;
 } music_state_t;
 
-void sound_play(const unsigned char __far *song, music_state_t *song_state, channel_t *song_channels);
+void sound_play(const unsigned char __wf_rom *song, music_state_t *song_state, channel_t *song_channels);
 void sound_update(music_state_t *song_state);
 void sound_stop(music_state_t *song_state);
 void sound_resume(music_state_t *song_state);

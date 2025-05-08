@@ -3,7 +3,15 @@
 # SPDX-FileContributor: Adrian "asie" Siekierka, 2023
 
 WONDERFUL_TOOLCHAIN ?= /opt/wonderful
-TARGET ?= wswan/medium
+
+# User config
+# ===========
+
+NAME		:= cygnals
+DESTDIR		?= $(WONDERFUL_TOOLCHAIN)/local/$(NAME)
+TARGET		?= wswan/medium wswan/medium-sram wswan/small wswan/small-sram
+
+ifeq (1,$(words [$(TARGET)]))
 include $(WONDERFUL_TOOLCHAIN)/target/$(TARGET)/makedefs.mk
 
 # Source code paths
@@ -26,9 +34,9 @@ LIBDIRS		:= $(WF_ARCH_LIBDIRS)
 # Build artifacts
 # ---------------
 
-NAME		:= cygnals
 BUILDDIR	:= build/$(TARGET)
 ARCHIVE		:= $(BUILDDIR)/lib$(NAME).a
+INSTALLDIR	:= $(DESTDIR)/$(TARGET)
 
 # Verbose flag
 # ------------
@@ -78,7 +86,7 @@ DEPS		:= $(OBJS:.o=.d)
 # Targets
 # -------
 
-.PHONY: all clean doc
+.PHONY: all clean doc install
 
 all: $(ARCHIVE) compile_commands.json
 
@@ -101,7 +109,11 @@ doc:
 	@echo "  DOXYGEN"
 	doxygen
 
-# TODO: Write install stage.
+install: $(ARCHIVE)
+	@echo "  INSTALL  $(INSTALLDIR)"
+	$(_V)install -d $(INSTALLDIR)/lib
+	$(_V)cp -r include $(INSTALLDIR)/
+	$(_V)cp $(ARCHIVE) $(INSTALLDIR)/lib/
 
 # Rules
 # -----
@@ -126,3 +138,26 @@ $(BUILDDIR)/%.lua.o : %.lua
 # --------------------------------------
 
 -include $(DEPS)
+
+else
+
+# Multiple targets specified; run make for each target separately
+# ---------------------------------------------------------------
+
+.PHONY: all clean doc install
+
+all: $(TARGET)
+
+$(TARGET):
+	$(MAKE) TARGET=$@
+
+clean:
+	$(foreach tgt, $(TARGET), $(MAKE) TARGET=$(tgt) clean; )
+
+doc:
+	$(MAKE) TARGET=$(firstword TARGET) doc
+
+install:
+	$(foreach tgt, $(TARGET), $(MAKE) TARGET=$(tgt) install; )
+
+endif

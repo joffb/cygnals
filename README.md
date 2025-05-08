@@ -32,9 +32,12 @@ The "Speeds" tempo mode (with separate Speed 1 and Speed 2 parameters) is suppor
 + EC - Note Cut
 + ED - Note Delay
 
-(*) Arpeggio, Slides, Portamento and Vibrato share memory and only one of them can be used at one time on a given channel
+(*) Arpeggio, Slide up/down, Portamento and Vibrato use the same memory in a channel, so only one of these effects can be used on a channel at one time e.g. using vibrato when arpeggio is enabled will switch off the arpeggio and enable vibrato instead. Across channels however, channel 1 could have vibrato going while channel 3 has arpeggios going.
 
-## Macros
+## Instruments and Macros
+
+The "Synthesiser" feature is not supported - wavetable macros should be used instead.
+
 Volume, Arpeggio, Wave, Pitch and Noise Macros can be used in Sequence mode - ADSR and LFO modes are not supported.
 
 Volume, Arpeggio and Wave Macros can all be used simultaneously.
@@ -44,9 +47,19 @@ Wave macros which are only 1 entry long will not be run as macros and will inste
 
 ## Using the driver
 
-Your makefile should be updated to add `-lcygnals` to the list of libraries on the line starting with `LIBS := `
+To install the libraries you should run
 
-The `build/wswan/medium/libcygnals.a` file should be placed in `/opt/wonderful/target/wswan/medium/lib/` and the `cygnals.h` should be placed in `/opt/wonderful/target/wswan/medium/include` or your project's include directory.
+```
+make
+make install
+```
+
+This will put the libraries and include files for all targets into `/opt/wonderful/local/cygnals`
+
+Your project's makefile should be updated to
+
++ add `-lcygnals` to the list of libraries on the line starting with `LIBS := `
++ add `$(WONDERFUL_TOOLCHAIN)/local/cygnals/$(TARGET)` to the list of directories on the line starting with `LIBDIRS := `
 
 ### Converting
 

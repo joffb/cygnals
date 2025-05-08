@@ -15,15 +15,15 @@ channel_t song_channels[4] __attribute__ ((aligned (2)));
 music_state_t sfx_state __attribute__ ((aligned (2)));
 channel_t sfx_channels[1] __attribute__ ((aligned (2)));
 
-extern const unsigned char __far cmajor_sn[];
-extern const unsigned char __far sfx_test[];
+extern const unsigned char __wf_rom cmajor_sn[];
+extern const unsigned char __wf_rom sfx_test[];
 
 __attribute__((section(".iramx_screen.1"))) ws_screen_cell_t screen_1[32*32];
 __attribute__((section(".iramx_screen.2"))) ws_screen_cell_t screen_2[32*32];
 
 volatile uint8_t vblank_fired;
 
-__attribute__((interrupt)) void vblank(void) __far
+__attribute__((interrupt)) void vblank(void) __wf_rom
 {
 	vblank_fired = 1;
 
@@ -33,7 +33,7 @@ __attribute__((interrupt)) void vblank(void) __far
 void main(void) {
 
 	unsigned char i;
-	const unsigned char __far *ptr = cmajor_sn;
+	const unsigned char __wf_rom *ptr = cmajor_sn;
 
 	uint16_t keypad, keypad_last, keypad_pushed;
 	keypad_last = 0;
