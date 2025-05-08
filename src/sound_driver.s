@@ -118,59 +118,65 @@ sound_play:
     test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SFX
     jnz sound_play_done
 
-    # enable channels 0-3
-    mov al, [di + MUSIC_STATE_SOUND_CH_CONTROL]
-	out IO_SND_CH_CTRL, al
+        # enable channels 0-3
+        mov al, [di + MUSIC_STATE_SOUND_CH_CONTROL]
+        out IO_SND_CH_CTRL, al
 
-	# set audio output level
-	mov al, 0x0f
-	out IO_SND_OUT_CTRL, al
-	
-	# set channel volumes
-	xor al, al
-	out IO_SND_VOL_CH1, al
-	out IO_SND_VOL_CH2, al
-	out IO_SND_VOL_CH3, al
-	out IO_SND_VOL_CH4, al
+        # set audio output level
+        mov al, 0x0f
+        out IO_SND_OUT_CTRL, al
+        
+        # set channel volumes
+        xor al, al
+        out IO_SND_VOL_CH1, al
+        out IO_SND_VOL_CH2, al
+        out IO_SND_VOL_CH3, al
+        out IO_SND_VOL_CH4, al
 
-    # get wave ram location
-    mov bx, [sound_wavetable_ram_ptr]
+        # preserve bp
+        push bp
 
-    # turn it into a value for the wave base register
-    mov ax, bx
-    shr ax, 6
-    mov dx, IO_SND_WAVE_BASE
-    out dx, al
+        # get wave ram location
+        mov bp, [sound_wavetable_ram_ptr]
 
-    # write wavetables starting at bx
-    mov cx, 4
-    mov dx, 0x2222
+        # turn it into a value for the wave base register
+        mov ax, bp
+        shr ax, 6
+        mov dx, IO_SND_WAVE_BASE
+        out dx, al
 
-    sp_init_wavetables:
+        # write wavetables starting at bx
+        mov cx, 4
+        mov dx, 0x2222
 
-        mov ax, 0x1100
+        sp_init_wavetables:
 
-        mov [bx], ax
-        add ax, dx
-        mov [bx + 2], ax
-        add ax, dx
-        mov [bx + 4], ax
-        add ax, dx
-        mov [bx + 6], ax
-        add ax, dx
-        mov [bx + 8], ax
-        add ax, dx
-        mov [bx + 10], ax
-        add ax, dx
-        mov [bx + 12], ax
-        add ax, dx
-        mov [bx + 14], ax
-        add ax, dx
+            mov ax, 0x1100
 
-        add bx, 16
+            mov [bp], ax
+            add ax, dx
+            mov [bp + 2], ax
+            add ax, dx
+            mov [bp + 4], ax
+            add ax, dx
+            mov [bp + 6], ax
+            add ax, dx
+            mov [bp + 8], ax
+            add ax, dx
+            mov [bp + 10], ax
+            add ax, dx
+            mov [bp + 12], ax
+            add ax, dx
+            mov [bp + 14], ax
+            add ax, dx
 
-        loopnz sp_init_wavetables
+            add bp, 16
 
+            loopnz sp_init_wavetables
+
+        # restore bp
+        pop bp
+        
     sound_play_done:
 
     popa

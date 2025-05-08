@@ -21,10 +21,6 @@ sound_update:
     push ds
     pusha
 
-    # ds = ram segment
-    mov bx, 0x0000
-    mov ds, bx
-
 	# get song state pointer into di
     mov di, ax
 

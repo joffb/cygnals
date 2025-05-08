@@ -21,16 +21,17 @@ sound_wavetable_change:
     test byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
     jnz swc_muted
 
-    push bx
+	push bp
 	push si
 
 	mov [si + CHANNEL_WAVETABLE_NUM], al
 
     # get address of wave ram for this channel into bx
-    mov bl, [si + CHANNEL_NUMBER]
-    shl bl, 4
-    xor bh, bh
-    add bx, [sound_wavetable_ram_ptr]
+    mov dl, [si + CHANNEL_NUMBER]
+    shl dl, 4
+    xor dh, dh
+	mov bp, [sound_wavetable_ram_ptr]
+    add bp, dx
 
     # get source address of wavetable 
     xor ah, ah
@@ -40,25 +41,25 @@ sound_wavetable_change:
 
 	# copy wave table
 	mov ax, es:[si + 0]
-	mov [bx + 0], ax
+	mov [bp + 0], ax
 	mov ax, es:[si + 2]
-	mov [bx + 2], ax
+	mov [bp + 2], ax
 	mov ax, es:[si + 4]
-	mov [bx + 4], ax
+	mov [bp + 4], ax
 	mov ax, es:[si + 6]
-	mov [bx + 6], ax
+	mov [bp + 6], ax
 	mov ax, es:[si + 8]
-	mov [bx + 8], ax
+	mov [bp + 8], ax
 	mov ax, es:[si + 10]
-	mov [bx + 10], ax
+	mov [bp + 10], ax
 	mov ax, es:[si + 12]
-	mov [bx + 12], ax
+	mov [bp + 12], ax
 	mov ax, es:[si + 14]
-	mov [bx + 14], ax
+	mov [bp + 14], ax
 
 	pop si
-	pop bx
-
+	pop bp
+	
 	swc_muted:
     ret
 
