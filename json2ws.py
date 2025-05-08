@@ -124,7 +124,9 @@ def main(argv=None):
     parser.add_option("-s", "--sfx",        dest='sfx',                               default="-1",  help='SFX channel')
 
     parser.add_option("-b", '--bank',       dest='bank',                                             help='BANK number')
-    parser.add_option("-a", '--area',       dest='area',                                             help='AREA name')
+    
+    parser.add_option("-p", '--song-prefix',       dest='song_data_prefix',                           default="fartext",   help='name used as .section prefix for song data')
+    parser.add_option("-q", '--sample-prefix',       dest='sample_data_prefix',                           default="fartext",   help='name used as .section prefix for sample data')
 
     parser.add_option("-j", '--json',       dest='jsonexport',                         default="",    help='json debug export file name')
 
@@ -737,7 +739,14 @@ def main(argv=None):
     outfile.write(".intel_syntax noprefix\n")
 
     outfile.write(".global " + song_prefix + "\n")
-    outfile.write(".section .fartext." + song_prefix + ", \"a\"\n")
+
+    # expose variable for sample data
+    if (song['sample_count'] > 0):
+        outfile.write(".global " + song_prefix + "_sample_data\n")
+
+    outfile.write("\n\n")
+    outfile.write(".section ." + options.song_data_prefix + "." + song_prefix + ", \"a\"\n")
+    outfile.write("\n")
 
     outfile.write(".balign 16\n")
     outfile.write(".org 0\n")
@@ -1107,6 +1116,10 @@ def main(argv=None):
         outfile.write(".byte 0xff #pad\n")
 
     # raw sample data
+    outfile.write("\n\n")
+    outfile.write(".section ." + options.sample_data_prefix + "." + song_prefix + "_samples, \"a\"\n")
+    outfile.write("\n")
+
     writelabel("sample_data")
 
     sample_size_total = 0

@@ -4,7 +4,11 @@
 .arch i186
 .intel_syntax noprefix
 .global sfx_test
+.global sfx_test_sample_data
+
+
 .section .fartext.sfx_test, "a"
+
 .balign 16
 .org 0
 sfx_test:
@@ -156,6 +160,10 @@ sfx_test_sample_4:
 .long 560
 .byte DMA_TRANSFER_ENABLE | SDMA_REPEAT | SDMA_RATE_12000
 .byte 0xff #pad
+
+
+.section .fartext.sfx_test_samples, "a"
+
 sfx_test_sample_data:
 sfx_test_sample_data_0:
 .byte 131, 137, 119, 100, 117, 107, 110, 139, 136, 130, 166, 169, 131, 144, 172, 147, 114, 108, 93, 90, 109, 105, 103, 111, 105, 95, 95, 119, 151, 166, 167, 184
