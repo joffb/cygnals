@@ -105,19 +105,23 @@ sound_update:
                     # clear playing flag
                     and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_PLAYING
 
-                    # not looping
-                    # mute channels
-                    mov al, 0x00
-                    mov dx, IO_SND_VOL_CH1
-                    out dx, al
-                    inc dx
-                    out dx, al
-                    inc dx
-                    out dx, al
-                    inc dx
-                    out dx, al
+                    # for sfx, don't mute all channels
+                    test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SFX
+                    jnz sound_update_done
 
-                    jmp sound_update_done
+                        # not looping
+                        # mute channels
+                        mov al, 0x00
+                        mov dx, IO_SND_VOL_CH1
+                        out dx, al
+                        inc dx
+                        out dx, al
+                        inc dx
+                        out dx, al
+                        inc dx
+                        out dx, al
+
+                        jmp sound_update_done
 
             mu_order_jump:
 

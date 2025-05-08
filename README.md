@@ -21,7 +21,7 @@ The "Speeds" tempo mode (with separate Speed 1 and Speed 2 parameters) is suppor
 + 08 - Set Panning
 + 09 - Set Speed 1
 + 0B - Jump to Pattern
-+ 0D - Jump to Next Pattern (parameter ignored)
++ 0D - Jump to Next Pattern (line parameter ignored)
 + 0F - Set Speed 2
 + 10 - Set Waveform
 + 11 - Set Noise Mode
@@ -46,7 +46,7 @@ Wave macros which are only 1 entry long will not be run as macros and will inste
 
 Your makefile should be updated to add `-lcygnals` to the list of libraries on the line starting with `LIBS := `
 
-The `build/wswan/medium/libcygnals.a` file should be placed in `/opt/wonderful/target/wswan/medium/lib/` and the `cygnals.h` should be in your project include directory.
+The `build/wswan/medium/libcygnals.a` file should be placed in `/opt/wonderful/target/wswan/medium/lib/` and the `cygnals.h` should be placed in `/opt/wonderful/target/wswan/medium/include` or your project's include directory.
 
 ### Converting
 
@@ -64,7 +64,7 @@ You can convert a sound effect as below:
 python3 ../json2ws.py --sfx 2 -o src/mysfx.s -i mysfx ./mysfx.fur 
 ```
 
-The main difference here is `--sfx 2` which tells the converter to only look at channel 2 (indexed starting at 1). You can specify multiple channels like `--sfx 124` will export channels 1, 3 and 4.
+The main difference here is `--sfx 2` which tells the converter to only look at channel 2 (indexed starting at 1). You can specify multiple channels like `--sfx 124` will export channels 1, 2 and 4.
 
 ### Variables
 
@@ -96,7 +96,13 @@ A song can be stopped with `sound_stop(&song_state);` which will mute the sound 
 A stopped song can be resumed from where it was with `sound_resume(&song_state);`.
 
 ### Sound effects (sfx)
-Sound effects (i.e. for scoring, jumping or weapon shots) can be played back in the same way as songs. You need to make variables for the sfx's state and for the maximum number of channels you will be using for effects. The number of channels should be stuck to, as an sfx playing back on more channels than there is RAM allocated could cause some big issues! This allocates space for the sfx's state and one channel:
+Sound effects (i.e. for scoring, jumping or weapon shots) or "sfx" can be played back in the same way as songs. You need to make variables for the sfx's state and for the maximum number of channels you will be using for effects. The number of channels should be stuck to, as an sfx playing back on more channels than there is RAM allocated could overwrite other stuff in RAM!
+
+Sfx patterns in Furnace should only be as long as they need to be, empty lines at the end of the pattern will keep playing as silence.
+
+Sfx should clean up after themselves using a note off or Note Cut effect at the end of the pattern to mute the currently playing sounds.
+
+This allocates space for the sfx's state and one channel:
 
 ```
 music_state_t sfx_state __attribute__ ((aligned (2)));
