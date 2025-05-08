@@ -14,8 +14,16 @@
 .global sound_sample_ptr
 .global sound_calc_sample_voice_volume
 
+.section .iram.cygnals_iram
+
+    # the value of ds may be changed when an interrupt runs
+    # variable used to store the correct ds for use in the interrupt
+    .balign 2
+    sound_ds_value: .word 0
+
 .data
 
+    .balign 2
     sound_sample_state_ptr: .word 0
 
     sound_sample_segment: .word 0
@@ -29,7 +37,6 @@
     sound_sample_flags: .byte 0
 
 .section .text.sound_driver
-
 
 # return sound channel 2 voice volume
 sound_calc_sample_voice_volume:
@@ -75,6 +82,7 @@ sound_sample_update_interrupt:
     push ax
     push bx
 
+    mov ds, ss:[sound_ds_value]
     mov es, [sound_sample_segment]
     mov bx, [sound_sample_ptr]
 

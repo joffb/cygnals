@@ -36,6 +36,9 @@ sound_play:
     push ds
     pusha
 
+    # keep value of ds around for interrupts
+    mov ss:[sound_ds_value], ds
+
     # es = song segment
     mov es, dx
 
