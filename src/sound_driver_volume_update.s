@@ -11,7 +11,7 @@
 
 .global sound_update_channel_volume
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 # ds - ram segment
 # es - song segment
@@ -31,7 +31,7 @@ sound_update_channel_volume:
 			# get new volume and update chip
 			push cx
 			call sound_calc_sample_voice_volume
-			out IO_SND_VOL_CH2_VOICE, al
+			out WS_SOUND_VOICE_VOL_PORT, al
 			pop cx
 
 			ret
@@ -125,7 +125,7 @@ sound_update_channel_volume:
 
 	# update chip register
 	mov dl, [si + CHANNEL_NUMBER]
-	add dl, IO_SND_VOL_CH1
+	add dl, WS_SOUND_VOL_CH1_PORT
 	xor dh, dh
 	out dx, al
 
@@ -207,7 +207,7 @@ sound_update_channel_volume:
 
 	# update chip register
     mov dl, [si + CHANNEL_NUMBER]
-    add dl, IO_SND_VOL_CH1
+    add dl, WS_SOUND_VOL_CH1_PORT
 	xor dh, dh
 	out dx, al
 

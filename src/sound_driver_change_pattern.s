@@ -11,7 +11,7 @@
 
 .global sound_update_change_pattern
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 # ds - ram segment
 # es - song segment

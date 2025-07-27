@@ -12,7 +12,7 @@
 .global sound_update
 .global sound_update_change_pattern
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 # ax - song state
 sound_update:
@@ -108,7 +108,7 @@ sound_update:
                         # not looping
                         # mute channels
                         mov al, 0x00
-                        mov dx, IO_SND_VOL_CH1
+                        mov dx, WS_SOUND_VOL_CH1_PORT
                         out dx, al
                         inc dx
                         out dx, al
@@ -156,7 +156,7 @@ sound_update:
     pop ds
     pop es
 
-    WF_PLATFORM_RET
+    IA16_RET
 
 # ds - ram segment
 # es - song segment

@@ -12,7 +12,7 @@
 .global sound_set_master_volume
 .global sound_set_master_volume_fade
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 # ax : song state pointer
 # dl : volume
@@ -50,4 +50,4 @@ sound_set_master_volume:
     pop di
     pop si
 
-    WF_PLATFORM_RET
+    IA16_RET

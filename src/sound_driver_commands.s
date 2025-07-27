@@ -11,7 +11,7 @@
 
 .global sunl_commands
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 .balign 2
 sunl_commands:
@@ -142,7 +142,7 @@ sunl_note_off:
     jnz sunl_loop
 
         mov dl, [si + CHANNEL_NUMBER]
-        add dl, IO_SND_VOL_CH1
+        add dl, WS_SOUND_VOL_CH1_PORT
         xor dh, dh
         xor al, al
         out dx, al
@@ -500,8 +500,8 @@ sunl_speaker_loudness:
 
     # update loudness value 
     mov al, ah
-    or al, SND_OUT_HEADPHONES_ENABLE | SND_OUT_SPEAKER_ENABLE
-    out IO_SND_OUT_CTRL, al
+    or al, WS_SOUND_OUT_CTRL_HEADPHONE_ENABLE | WS_SOUND_OUT_CTRL_SPEAKER_ENABLE
+    out WS_SOUND_OUT_CTRL_PORT, al
 
     # move on command pointer
     add bx, 2

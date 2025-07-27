@@ -18,8 +18,8 @@ channel_t sfx_channels[1] __attribute__ ((aligned (2)));
 extern const unsigned char __wf_rom cmajor_sn[];
 extern const unsigned char __wf_rom sfx_test[];
 
-__attribute__((section(".iramx_screen.1"))) ws_screen_cell_t screen_1[32*32];
-__attribute__((section(".iramx_screen.2"))) ws_screen_cell_t screen_2[32*32];
+__attribute__((section(".iramx_screen.1"))) uint16_t screen_1[32*32];
+__attribute__((section(".iramx_screen.2"))) uint16_t screen_2[32*32];
 
 volatile uint8_t vblank_fired;
 
@@ -27,7 +27,7 @@ __attribute__((interrupt)) void vblank(void) __wf_rom
 {
 	vblank_fired = 1;
 
-	ws_hwint_ack(HWINT_VBLANK);
+	ws_int_ack(WS_INT_ACK_VBLANK);
 }
 
 void main(void) {
@@ -45,41 +45,41 @@ void main(void) {
 	//sound_set_wavetable_ram_address((unsigned char *)0xf00);
 
 	// mono gfx, set black color
-	outportw(IO_SCR_PAL_0, MONO_PAL_COLORS(1, 7, 3, 0));
-	outportb(IO_SCR_BASE, SCR1_BASE(screen_1) | SCR2_BASE(screen_2));
+	outportw(WS_SCR_PAL_0_PORT, WS_DISPLAY_MONO_PALETTE(1, 7, 3, 0));
+	outportb(WS_SCR_BASE_PORT, WS_SCR_BASE_ADDR1(screen_1) | WS_SCR_BASE_ADDR2(screen_2));
 
-	wsx_lzsa2_decompress(MEM_TILE(160), gfx_text_mono_tiles);
+	wsx_lzsa2_decompress(WS_TILE_MEM(160), gfx_text_mono_tiles);
 
 	// reset scroll registers to 0
-	outportb(IO_SCR1_SCRL_X, 0);
-	outportb(IO_SCR1_SCRL_Y, 0);
-	outportb(IO_SCR2_SCRL_X, 0);
-	outportb(IO_SCR2_SCRL_Y, 0);
+	outportb(WS_SCR1_SCRL_X_PORT, 0);
+	outportb(WS_SCR1_SCRL_Y_PORT, 0);
+	outportb(WS_SCR2_SCRL_X_PORT, 0);
+	outportb(WS_SCR2_SCRL_Y_PORT, 0);
 
-	screen_1[0].tile = 0;
+	screen_1[0] = 0;
 
 	// enable just screen_1
-	outportw(IO_DISPLAY_CTRL, DISPLAY_SCR1_ENABLE);
+	outportw(WS_DISPLAY_CTRL_PORT, WS_DISPLAY_CTRL_SCR1_ENABLE);
 
 	// initialize display LUT
 	// colors 7,6,5,4 used by baize
 	// colors 7,3,1,0 used by UI
-	ws_display_set_shade_lut(SHADE_LUT(0, 2, 4, 6, 12, 13, 14, 15));
+	ws_display_set_shade_lut(WS_DISPLAY_SHADE_LUT(0, 2, 4, 6, 12, 13, 14, 15));
 
 	sound_play(ptr, &song_state, song_channels);
 	//sound_disable_looping();
 	
 	// acknowledge interrupt
-	outportb(IO_HWINT_ACK, 0xFF);
+	outportb(WS_INT_ACK_PORT, 0xFF);
 
 	// set interrupt handler which only acknowledges the vblank interrupt
-	ws_hwint_set_handler(HWINT_IDX_VBLANK, vblank);
+	ws_int_set_handler(WS_INT_VBLANK, vblank);
 
 	// enable wonderswan vblank interrupt
-	ws_hwint_enable(HWINT_VBLANK);
+	ws_int_enable(WS_INT_ENABLE_VBLANK);
 
 	// enable cpu interrupts
-	cpu_irq_enable();
+	ia16_enable_irq();
 
 	while(1)
 	{
@@ -109,17 +109,17 @@ void main(void) {
 		keypad_pushed = ((keypad ^ keypad_last) & keypad);
 		keypad_last = keypad;
 
-		if (keypad_pushed & KEY_X1)
+		if (keypad_pushed & WS_KEY_X1)
 		{
 			sound_set_master_volume(&song_state, song_state.master_volume + 4);
 		}
-		else if (keypad_pushed & KEY_X3)
+		else if (keypad_pushed & WS_KEY_X3)
 		{
 			sound_set_master_volume(&song_state, song_state.master_volume - 4);
 		}
 
 		
-		if (keypad_pushed & KEY_A)
+		if (keypad_pushed & WS_KEY_A)
 		{
 			if (song_state.flags & 0x8)
 			{
@@ -131,14 +131,14 @@ void main(void) {
 			}
 		}
 
-		if (keypad_pushed & KEY_B)
+		if (keypad_pushed & WS_KEY_B)
 		{
 			sound_play(sfx_test, &sfx_state, sfx_channels);
 			sound_mute_channels(&song_state, sound_get_channels(&sfx_state));
 		}
 
 
-		if (keypad_pushed & KEY_Y1)
+		if (keypad_pushed & WS_KEY_Y1)
 		{
 			if (song_channels[0].flags & 0x1)
 			{
@@ -149,7 +149,7 @@ void main(void) {
 				sound_mute_channel(&song_state, 0);
 			}
 		}			
-		if (keypad_pushed & KEY_Y2)
+		if (keypad_pushed & WS_KEY_Y2)
 		{
 			if (song_channels[1].flags & 0x1)
 			{
@@ -160,7 +160,7 @@ void main(void) {
 				sound_mute_channel(&song_state, 1);
 			}
 		}
-		if (keypad_pushed & KEY_Y3)
+		if (keypad_pushed & WS_KEY_Y3)
 		{
 			if (song_channels[2].flags & 0x1)
 			{
@@ -171,7 +171,7 @@ void main(void) {
 				sound_mute_channel(&song_state, 2);
 			}
 		}
-		if (keypad_pushed & KEY_Y4)
+		if (keypad_pushed & WS_KEY_Y4)
 		{
 			if (song_channels[3].flags & 0x1)
 			{

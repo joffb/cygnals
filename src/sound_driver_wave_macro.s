@@ -12,7 +12,7 @@
 .global sound_update_wave_macro
 .global sound_wavetable_change
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 # al: wavetable number
 sound_wavetable_change:

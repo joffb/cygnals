@@ -11,7 +11,7 @@
 
 .global sound_update_vibrato
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 sound_update_vibrato:
 

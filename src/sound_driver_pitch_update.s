@@ -11,7 +11,7 @@
 
 .global sound_update_channel_pitch
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 # ds - ram segment
 # es - song segment
@@ -115,7 +115,7 @@ sound_update_channel_pitch:
     # get port number for pitch for this channel
     mov dl, [si + CHANNEL_NUMBER]
     add dl ,dl
-    add dl, IO_SND_FREQ_CH1
+    add dl, WS_SOUND_FREQ_CH1_PORT
     xor dh, dh
 
     # update pitch

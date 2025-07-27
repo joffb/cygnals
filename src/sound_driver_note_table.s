@@ -1,6 +1,3 @@
-
-# Cygnals - Joe Kennedy 2025
-
 #include <wonderful.h>
 #include <ws.h>
 #include "cygnals.h"
@@ -11,7 +8,7 @@
 
 .global sound_note_table
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 sound_note_table:
 # note 24

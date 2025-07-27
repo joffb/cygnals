@@ -12,7 +12,7 @@
 .global sound_enable_looping
 .global sound_disable_looping
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 # ax - song state
 sound_enable_looping:
@@ -20,7 +20,7 @@ sound_enable_looping:
     mov bx, ax
     or byte ptr [bx + MUSIC_STATE_FLAGS], STATE_FLAG_LOOP
 
-    WF_PLATFORM_RET
+    IA16_RET
 
 # ax - song state
 sound_disable_looping:
@@ -28,5 +28,5 @@ sound_disable_looping:
     mov bx, ax
     and byte ptr [bx + MUSIC_STATE_FLAGS], ~STATE_FLAG_LOOP
 
-    WF_PLATFORM_RET
+    IA16_RET
 

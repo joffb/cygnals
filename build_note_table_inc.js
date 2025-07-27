@@ -11,7 +11,7 @@ fs.writeSync(out_sdas, '.intel_syntax noprefix\n');
 fs.writeSync(out_sdas, '\n');
 fs.writeSync(out_sdas, '.global sound_note_table\n');
 fs.writeSync(out_sdas, '\n');
-fs.writeSync(out_sdas, '.section .text.sound_driver\n');
+fs.writeSync(out_sdas, '.section .fartext.sound_driver, "ax"\n');
 fs.writeSync(out_sdas, '\n');
 fs.writeSync(out_sdas, 'sound_note_table:\n');
 

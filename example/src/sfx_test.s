@@ -138,27 +138,27 @@ sfx_test_sample_table:
 sfx_test_sample_0:
 .long sfx_test_sample_data_0
 .long 1125
-.byte DMA_TRANSFER_ENABLE | SDMA_REPEAT | SDMA_RATE_12000
+.byte WS_SDMA_CTRL_ENABLE | WS_SDMA_CTRL_REPEAT | WS_SDMA_CTRL_RATE_12000
 .byte 0xff #pad
 sfx_test_sample_1:
 .long sfx_test_sample_data_1
 .long 1154
-.byte DMA_TRANSFER_ENABLE | SDMA_RATE_12000
+.byte WS_SDMA_CTRL_ENABLE | WS_SDMA_CTRL_RATE_12000
 .byte 0xff #pad
 sfx_test_sample_2:
 .long sfx_test_sample_data_2
 .long 888
-.byte DMA_TRANSFER_ENABLE | SDMA_REPEAT | SDMA_RATE_12000
+.byte WS_SDMA_CTRL_ENABLE | WS_SDMA_CTRL_REPEAT | WS_SDMA_CTRL_RATE_12000
 .byte 0xff #pad
 sfx_test_sample_3:
 .long sfx_test_sample_data_3
 .long 747
-.byte DMA_TRANSFER_ENABLE | SDMA_REPEAT | SDMA_RATE_12000
+.byte WS_SDMA_CTRL_ENABLE | WS_SDMA_CTRL_REPEAT | WS_SDMA_CTRL_RATE_12000
 .byte 0xff #pad
 sfx_test_sample_4:
 .long sfx_test_sample_data_4
 .long 560
-.byte DMA_TRANSFER_ENABLE | SDMA_REPEAT | SDMA_RATE_12000
+.byte WS_SDMA_CTRL_ENABLE | WS_SDMA_CTRL_REPEAT | WS_SDMA_CTRL_RATE_12000
 .byte 0xff #pad
 
 

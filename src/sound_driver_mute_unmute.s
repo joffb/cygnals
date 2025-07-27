@@ -15,7 +15,7 @@
 .global sound_unmute_all
 .global sound_mute_channels
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 # ax : song_state pointer
 # returns
@@ -32,7 +32,7 @@ sound_get_channels:
     pop es
     pop di
 
-    WF_PLATFORM_RET
+    IA16_RET
 
 
 # ax : song state pointer
@@ -70,14 +70,14 @@ sound_mute_channel:
     smc_not_ch2:
 
     # set chip channel volume to 0
-    add dl, IO_SND_VOL_CH1
+    add dl, WS_SOUND_VOL_CH1_PORT
     xor dh, dh
     xor al, al
     out dx, al
 
     pop di
 
-    WF_PLATFORM_RET
+    IA16_RET
 
 # ax: song state pointer
 # dl: channels byte
@@ -114,7 +114,7 @@ sound_mute_channels:
 
             # set chip channel volume to 0
             mov dl, [si + CHANNEL_NUMBER]
-            add dl, IO_SND_VOL_CH1
+            add dl, WS_SOUND_VOL_CH1_PORT
             xor dh, dh
             xor al, al
             out dx, al
@@ -146,7 +146,7 @@ sound_mute_channels:
     pop si
     pop di
 
-    WF_PLATFORM_RET
+    IA16_RET
 
 
 # ax : song state pointer
@@ -180,7 +180,7 @@ sound_unmute_channel:
 
     # restore noise control value
     mov [di + MUSIC_STATE_NOISE_MODE], al
-    out IO_SND_NOISE_CTRL, al
+    out WS_SOUND_NOISE_CTRL_PORT, al
 
     # is this channel 4?
     # restore noise mode value in sound control register
@@ -188,19 +188,19 @@ sound_unmute_channel:
     jnz sunmc_not_ch4
 
         # get current register value
-        in al, IO_SND_CH_CTRL
-        and al, ~SND_CH4_NOISE
+        in al, WS_SOUND_CH_CTRL_PORT
+        and al, ~WS_SOUND_CH_CTRL_CH4_NOISE
 
         # should noise be on?
         test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_NOISE_ON
         jz sunmc_noise_off
 
-            or al, SND_CH4_NOISE
+            or al, WS_SOUND_CH_CTRL_CH4_NOISE
 
         sunmc_noise_off:
 
         # update register
-        out IO_SND_CH_CTRL, al
+        out WS_SOUND_CH_CTRL_PORT, al
 
     sunmc_not_ch4:
 
@@ -208,7 +208,7 @@ sound_unmute_channel:
     pop si
     pop di
 
-    WF_PLATFORM_RET
+    IA16_RET
 
 # ax : song state pointer
 sound_unmute_all:
@@ -250,19 +250,19 @@ sound_unmute_all:
             jnz sunmac_not_ch4
 
                 # get current register value
-                in al, IO_SND_CH_CTRL
-                and al, ~SND_CH4_NOISE
+                in al, WS_SOUND_CH_CTRL_PORT
+                and al, ~WS_SOUND_CH_CTRL_CH4_NOISE
 
                 # should noise be on?
                 test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_NOISE_ON
                 jz sunmac_noise_off
 
-                    or al, SND_CH4_NOISE
+                    or al, WS_SOUND_CH_CTRL_CH4_NOISE
 
                 sunmac_noise_off:
 
                 # update register
-                out IO_SND_CH_CTRL, al
+                out WS_SOUND_CH_CTRL_PORT, al
 
             sunmac_not_ch4:
 
@@ -275,10 +275,10 @@ sound_unmute_all:
 
     # restore noise control value
     mov [di + MUSIC_STATE_NOISE_MODE], al
-    out IO_SND_NOISE_CTRL, al
+    out WS_SOUND_NOISE_CTRL_PORT, al
 
     pop es
     pop si
     pop di
 
-    WF_PLATFORM_RET
+    IA16_RET

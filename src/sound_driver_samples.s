@@ -13,6 +13,7 @@
 .global sound_sample_note_off
 .global sound_sample_ptr
 .global sound_calc_sample_voice_volume
+.global sound_ds_value
 
 .section .iram.cygnals_iram
 
@@ -36,7 +37,7 @@
 
     sound_sample_flags: .byte 0
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 # return sound channel 2 voice volume
 sound_calc_sample_voice_volume:
@@ -88,45 +89,45 @@ sound_sample_update_interrupt:
 
     # get and output next sample 
     mov al, es:[bx]
-    out IO_SND_VOL_CH2, al
+    out WS_SOUND_VOL_CH2_PORT, al
 
     # get counter and decrease it
     dec word ptr [sound_sample_counter]
     jnz ssu_int_not_end
 
         # looping?
-        test byte ptr [sound_sample_flags], SDMA_REPEAT
+        test byte ptr [sound_sample_flags], WS_SDMA_CTRL_REPEAT
         jnz ssu_int_looping
 
             # is not looping
             # disable interrupt
 
             # disable line timer interrupts
-            in al, IO_HWINT_ENABLE
-            and al, ~HWINT_HBLANK_TIMER
-            out IO_HWINT_ENABLE, al
+            in al, WS_INT_ENABLE_PORT
+            and al, ~WS_INT_ENABLE_HBL_TIMER
+            out WS_INT_ENABLE_PORT, al
 
             # disable line timer interrupts
-            in al, IO_TIMER_CTRL
-            and al, ~(HBLANK_TIMER_ENABLE | HBLANK_TIMER_REPEAT)
-            out IO_TIMER_CTRL, al
+            in al, WS_TIMER_CTRL_PORT
+            and al, ~(WS_TIMER_CTRL_HBL_ENABLE_BIT | WS_TIMER_CTRL_HBL_REPEAT)
+            out WS_TIMER_CTRL_PORT, al
 
             # set ch2 volume/sample to 0
             xor al, al
-            out IO_SND_VOL_CH2, al
+            out WS_SOUND_VOL_CH2_PORT, al
 
             # disable voice mode
-            in al, IO_SND_CH_CTRL
-            and al, ~SND_CH2_VOICE
-            out IO_SND_CH_CTRL, al
+            in al, WS_SOUND_CH_CTRL_PORT
+            and al, ~WS_SOUND_CH_CTRL_CH2_VOICE
+            out WS_SOUND_CH_CTRL_PORT, al
 
             # clear sample playing flag
             mov bx, [sound_sample_state_ptr]
             and byte ptr [bx + MUSIC_STATE_FLAGS], ~STATE_FLAG_SAMPLE_PLAYING
 
             # acknowledge interrupt
-            mov al, HWINT_HBLANK_TIMER
-            out IO_HWINT_ACK, al
+            mov al, WS_INT_ACK_HBL_TIMER
+            out WS_INT_ACK_PORT, al
 
             pop bx
             pop ax
@@ -147,8 +148,8 @@ sound_sample_update_interrupt:
             mov [sound_sample_ptr], ax
 
             # acknowledge interrupt
-            mov al, HWINT_HBLANK_TIMER
-            out IO_HWINT_ACK, al
+            mov al, WS_INT_ACK_HBL_TIMER
+            out WS_INT_ACK_PORT, al
 
             pop bx
             pop ax
@@ -164,8 +165,8 @@ sound_sample_update_interrupt:
         mov [sound_sample_ptr], bx
 
         # acknowledge interrupt
-        mov al, HWINT_HBLANK_TIMER
-        out IO_HWINT_ACK, al
+        mov al, WS_INT_ACK_HBL_TIMER
+        out WS_INT_ACK_PORT, al
 
         pop bx
         pop ax
@@ -187,8 +188,8 @@ sound_sample_note_on:
     or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_NOTE_ON
 
     # running in colour mode?
-    in al, IO_SYSTEM_CTRL2
-    test al, SYSTEM_CTRL2_COLOR
+    in al, WS_SYSTEM_CTRL_COLOR_PORT
+    test al, WS_SYSTEM_CTRL_COLOR_MODE_COLOR_4BPP
     jnz ssno_colour_mode
         
         # mono mode, using interrupts
@@ -207,28 +208,28 @@ sound_sample_note_on:
         mov [sound_sample_flags], al
 
         # don't play sample if it's 24khz
-        and al, SDMA_RATE_MASK
-        cmp al, SDMA_RATE_24000
+        and al, WS_SDMA_CTRL_RATE_MASK
+        cmp al, WS_SDMA_CTRL_RATE_24000
         jnz ssno_mono_sample_rate_ok
 
             # set ch2 volume/sample to 0
             xor al, al
-            out IO_SND_VOL_CH2, al
+            out WS_SOUND_VOL_CH2_PORT, al
 
             # disable voice mode
-            in al, IO_SND_CH_CTRL
-            and al, ~SND_CH2_VOICE
-            out IO_SND_CH_CTRL, al
+            in al, WS_SOUND_CH_CTRL_PORT
+            and al, ~WS_SOUND_CH_CTRL_CH2_VOICE
+            out WS_SOUND_CH_CTRL_PORT, al
 
             # disable line timer interrupts
-            in al, IO_HWINT_ENABLE
-            and al, ~HWINT_HBLANK_TIMER
-            out IO_HWINT_ENABLE, al
+            in al, WS_INT_ENABLE_PORT
+            and al, ~WS_INT_ENABLE_HBL_TIMER
+            out WS_INT_ENABLE_PORT, al
 
             # disable line timer interrupts
-            in al, IO_TIMER_CTRL
-            and al, ~(HBLANK_TIMER_ENABLE | HBLANK_TIMER_REPEAT)
-            out IO_TIMER_CTRL, al
+            in al, WS_TIMER_CTRL_PORT
+            and al, ~(WS_TIMER_CTRL_HBL_ENABLE_BIT | WS_TIMER_CTRL_HBL_REPEAT)
+            out WS_TIMER_CTRL_PORT, al
 
             # clear sample playing flag
             and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_SAMPLE_PLAYING
@@ -263,23 +264,23 @@ sound_sample_note_on:
 
         # set ch2 volume/first sample to 0
         xor al, al
-        out IO_SND_VOL_CH2, al
+        out WS_SOUND_VOL_CH2_PORT, al
 
         # enable ch2 voice mode
-        in al, IO_SND_CH_CTRL
-        or al, SND_CH2_VOICE
-        out IO_SND_CH_CTRL, al
+        in al, WS_SOUND_CH_CTRL_PORT
+        or al, WS_SOUND_CH_CTRL_CH2_VOICE
+        out WS_SOUND_CH_CTRL_PORT, al
 
         # set ch2 voice volume
         call sound_calc_sample_voice_volume
-        out IO_SND_VOL_CH2_VOICE, al
+        out WS_SOUND_VOICE_VOL_PORT, al
 
         # set interrupt vector
         # get vector address for hblank timer repeat into bx
         # vector number in al
-        in al, IO_HWINT_VECTOR
+        in al, WS_INT_VECTOR_PORT
         and al, 0xf8
-        add al, HWINT_IDX_HBLANK_TIMER
+        add al, WS_INT_HBL_TIMER
 
         # bx = vector number * 4
         mov bl, al
@@ -299,17 +300,17 @@ sound_sample_note_on:
         not al
         and al, 0x3
         xor ah, ah
-        out IO_HBLANK_TIMER, ax
+        out WS_TIMER_HBL_RELOAD_PORT, ax
 
         # configure line timer interrupts
-        in al, IO_TIMER_CTRL
-        or al, HBLANK_TIMER_ENABLE | HBLANK_TIMER_REPEAT
-        out IO_TIMER_CTRL, al
+        in al, WS_TIMER_CTRL_PORT
+        or al, WS_TIMER_CTRL_HBL_ENABLE_BIT | WS_TIMER_CTRL_HBL_REPEAT
+        out WS_TIMER_CTRL_PORT, al
 
         # enable line timer interrupt
-        in al, IO_HWINT_ENABLE
-        or al, HWINT_HBLANK_TIMER
-        out IO_HWINT_ENABLE, al
+        in al, WS_INT_ENABLE_PORT
+        or al, WS_INT_ENABLE_HBL_TIMER
+        out WS_INT_ENABLE_PORT, al
 
         # set sample playing flag
         or byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
@@ -333,28 +334,28 @@ sound_sample_note_on:
 
         # output SDMA sound_instrument_change
         mov ax, es:[bx + SAMPLE_TABLE_DATA_PTR]
-        out IO_SDMA_SOURCE_L, ax
+        out WS_SDMA_SOURCE_L_PORT, ax
         mov al, es:[bx + SAMPLE_TABLE_DATA_PTR + 2]
-        out IO_SDMA_SOURCE_H, al
+        out WS_SDMA_SOURCE_H_PORT, al
 
         # output SDMA length
         mov ax, es:[bx + SAMPLE_TABLE_LENGTH]
-        out IO_SDMA_LENGTH_L, ax
+        out WS_SDMA_LENGTH_L_PORT, ax
         mov al, es:[bx + SAMPLE_TABLE_LENGTH + 2]
-        out IO_SDMA_LENGTH_H, al
+        out WS_SDMA_LENGTH_H_PORT, al
 
         # start SDMA
         mov al, es:[bx + SAMPLE_TABLE_FLAGS]
-        out IO_SDMA_CTRL, al
+        out WS_SDMA_CTRL_PORT, al
 
         # set ch2 voice mode bit
-        in al, IO_SND_CH_CTRL
-        or al, SND_CH2_VOICE
-        out IO_SND_CH_CTRL, al
+        in al, WS_SOUND_CH_CTRL_PORT
+        or al, WS_SOUND_CH_CTRL_CH2_VOICE
+        out WS_SOUND_CH_CTRL_PORT, al
 
         # set ch2 voice volume
         call sound_calc_sample_voice_volume
-        out IO_SND_VOL_CH2_VOICE, al
+        out WS_SOUND_VOICE_VOL_PORT, al
 
         # set sample playing flag
         or byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
@@ -377,34 +378,34 @@ sound_sample_note_off:
     and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_NOTE_ON
 
     # running in colour mode?
-    in al, IO_SYSTEM_CTRL2
-    test al, SYSTEM_CTRL2_COLOR
+    in al, WS_SYSTEM_CTRL_COLOR_PORT
+    test al, WS_SYSTEM_CTRL_COLOR_MODE_COLOR_4BPP
     jnz ssnoff_colour_mode
 
         # mono mode
 
         # disable line timer interrupts
-        in al, IO_HWINT_ENABLE
-        and al, ~HWINT_HBLANK_TIMER
-        out IO_HWINT_ENABLE, al
+        in al, WS_INT_ENABLE_PORT
+        and al, ~WS_INT_ENABLE_HBL_TIMER
+        out WS_INT_ENABLE_PORT, al
 
         # disable line timer interrupts
-        in al, IO_TIMER_CTRL
-        and al, ~(HBLANK_TIMER_ENABLE | HBLANK_TIMER_REPEAT)
-        out IO_TIMER_CTRL, al
+        in al, WS_TIMER_CTRL_PORT
+        and al, ~(WS_TIMER_CTRL_HBL_ENABLE_BIT | WS_TIMER_CTRL_HBL_REPEAT)
+        out WS_TIMER_CTRL_PORT, al
 
         # acknowledge interrupt
-        mov al, HWINT_HBLANK_TIMER
-        out IO_HWINT_ACK, al
+        mov al, WS_INT_ACK_HBL_TIMER
+        out WS_INT_ACK_PORT, al
 
         # set ch2 volume/sample to 0
         xor al, al
-        out IO_SND_VOL_CH2, al
+        out WS_SOUND_VOL_CH2_PORT, al
 
         # disable voice mode
-        in al, IO_SND_CH_CTRL
-        and al, ~SND_CH2_VOICE
-        out IO_SND_CH_CTRL, al
+        in al, WS_SOUND_CH_CTRL_PORT
+        and al, ~WS_SOUND_CH_CTRL_CH2_VOICE
+        out WS_SOUND_CH_CTRL_PORT, al
 
         ret
 
@@ -414,20 +415,20 @@ sound_sample_note_off:
 
         # stop SDMA
         xor al, al
-        out IO_SDMA_CTRL, al
+        out WS_SDMA_CTRL_PORT, al
 
         # clear ch2 voice mode bit
-        in al, IO_SND_CH_CTRL
-        and al, ~SND_CH2_VOICE
-        out IO_SND_CH_CTRL, al
+        in al, WS_SOUND_CH_CTRL_PORT
+        and al, ~WS_SOUND_CH_CTRL_CH2_VOICE
+        out WS_SOUND_CH_CTRL_PORT, al
 
         # set ch2 volume/sample to 0
         xor al, al
-        out IO_SND_VOL_CH2, al
+        out WS_SOUND_VOL_CH2_PORT, al
 
         # disable voice mode
-        in al, IO_SND_CH_CTRL
-        and al, ~SND_CH2_VOICE
-        out IO_SND_CH_CTRL, al
+        in al, WS_SOUND_CH_CTRL_PORT
+        and al, ~WS_SOUND_CH_CTRL_CH2_VOICE
+        out WS_SOUND_CH_CTRL_PORT, al
 
         ret

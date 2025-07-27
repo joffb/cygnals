@@ -1097,19 +1097,19 @@ def main(argv=None):
         outfile.write(".long " + song_prefix + "_sample_data_" + str(i) + "\n")
         outfile.write(".long " + str(sample["length"]) + "\n")
 
-        sample_flags = "DMA_TRANSFER_ENABLE"
+        sample_flags = "WS_SDMA_CTRL_ENABLE"
 
         if sample["loop_start"] != -1:
-            sample_flags = sample_flags + " | SDMA_REPEAT"
+            sample_flags = sample_flags + " | WS_SDMA_CTRL_REPEAT"
 
         if sample["c4_rate"] >= 18000:
-            sample_flags = sample_flags + " | SDMA_RATE_24000"
+            sample_flags = sample_flags + " | WS_SDMA_CTRL_RATE_24000"
         elif sample["c4_rate"] >= 9000:
-            sample_flags = sample_flags + " | SDMA_RATE_12000"
+            sample_flags = sample_flags + " | WS_SDMA_CTRL_RATE_12000"
         elif sample["c4_rate"] >= 5000:
-            sample_flags = sample_flags + " | SDMA_RATE_6000"
+            sample_flags = sample_flags + " | WS_SDMA_CTRL_RATE_6000"
         else:
-            sample_flags = sample_flags + " | SDMA_RATE_4000"
+            sample_flags = sample_flags + " | WS_SDMA_CTRL_RATE_4000"
 
         outfile.write(".byte " + sample_flags + "\n")
 

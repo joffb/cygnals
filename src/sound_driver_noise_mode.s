@@ -11,7 +11,7 @@
 
 .global sound_noise_mode_change
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 # al : noise mode
 sound_noise_mode_change:
@@ -21,8 +21,8 @@ sound_noise_mode_change:
     jnz snmc_noise_on
 
         # clear ch4 noise bit
-        in al, IO_SND_CH_CTRL 
-        and al, ~SND_CH4_NOISE
+        in al, WS_SOUND_CH_CTRL_PORT 
+        and al, ~WS_SOUND_CH_CTRL_CH4_NOISE
 
         # update noise flag in state
         and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_NOISE_ON
@@ -32,7 +32,7 @@ sound_noise_mode_change:
         jnz snmc_off_muted
 
             # output to sound control port
-            out IO_SND_CH_CTRL, al
+            out WS_SOUND_CH_CTRL_PORT, al
 
         snmc_off_muted:
 
@@ -43,13 +43,13 @@ sound_noise_mode_change:
         
         # get noise tap value with noise enable bit
         dec al
-        or al, SND_NOISE_ENABLE | SND_NOISE_RESET
+        or al, WS_SOUND_NOISE_CTRL_ENABLE | WS_SOUND_NOISE_CTRL_RESET
         mov [di + MUSIC_STATE_NOISE_MODE], al
         mov ah, al
 
         # set ch4 noise bit
-        in al, IO_SND_CH_CTRL
-        or al, SND_CH4_NOISE
+        in al, WS_SOUND_CH_CTRL_PORT
+        or al, WS_SOUND_CH_CTRL_CH4_NOISE
 
         # update noise flag in state
         or byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_NOISE_ON
@@ -59,11 +59,11 @@ sound_noise_mode_change:
         jnz snmc_on_muted
 
             # output to sound control port
-            out IO_SND_CH_CTRL, al
+            out WS_SOUND_CH_CTRL_PORT, al
 
             # output to noise control port
             mov al, ah
-            out IO_SND_NOISE_CTRL, al
+            out WS_SOUND_NOISE_CTRL_PORT, al
 
         snmc_on_muted:
 

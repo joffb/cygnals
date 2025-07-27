@@ -22,14 +22,14 @@
 
 sound_wavetable_ram_ptr: .word WAVETABLE_WRAM
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 sound_play:
 
     # get channels pointer into bx from stack
     push bp
     mov bp, sp
-    mov bx, [bp + WF_PLATFORM_CALL_STACK_OFFSET(2)] 
+    mov bx, [bp + IA16_CALL_STACK_OFFSET(2)] 
     pop bp
 
     push es
@@ -123,18 +123,18 @@ sound_play:
 
         # enable channels 0-3
         mov al, [di + MUSIC_STATE_SOUND_CH_CONTROL]
-        out IO_SND_CH_CTRL, al
+        out WS_SOUND_CH_CTRL_PORT, al
 
         # set audio output level
         mov al, 0x0f
-        out IO_SND_OUT_CTRL, al
+        out WS_SOUND_OUT_CTRL_PORT, al
         
         # set channel volumes
         xor al, al
-        out IO_SND_VOL_CH1, al
-        out IO_SND_VOL_CH2, al
-        out IO_SND_VOL_CH3, al
-        out IO_SND_VOL_CH4, al
+        out WS_SOUND_VOL_CH1_PORT, al
+        out WS_SOUND_VOL_CH2_PORT, al
+        out WS_SOUND_VOL_CH3_PORT, al
+        out WS_SOUND_VOL_CH4_PORT, al
 
         # preserve bp
         push bp
@@ -145,7 +145,7 @@ sound_play:
         # turn it into a value for the wave base register
         mov ax, bp
         shr ax, 6
-        mov dx, IO_SND_WAVE_BASE
+        mov dx, WS_SOUND_WAVE_BASE_PORT
         out dx, al
 
         # write wavetables starting at bx
@@ -186,7 +186,7 @@ sound_play:
     pop ds
     pop es
 
-    WF_PLATFORM_RET 0x2
+    IA16_RET 0x2
 
 
 # ds - ram segment
@@ -236,16 +236,16 @@ sound_stop:
 
         # mute channel volumes
         xor al, al
-        out IO_SND_VOL_CH1, al
-        out IO_SND_VOL_CH2, al
-        out IO_SND_VOL_CH3, al
-        out IO_SND_VOL_CH4, al
+        out WS_SOUND_VOL_CH1_PORT, al
+        out WS_SOUND_VOL_CH2_PORT, al
+        out WS_SOUND_VOL_CH3_PORT, al
+        out WS_SOUND_VOL_CH4_PORT, al
 
     sound_stop_done:
 
     pop di
 
-    WF_PLATFORM_RET
+    IA16_RET
 
 # ax: song state pointer
 sound_resume:
@@ -253,11 +253,11 @@ sound_resume:
     mov bx, ax
     or byte ptr [bx + MUSIC_STATE_FLAGS], STATE_FLAG_PLAYING
 
-    WF_PLATFORM_RET
+    IA16_RET
 
 # ax: wavetable ram address
 sound_set_wavetable_ram_address:
 
     mov [sound_wavetable_ram_ptr], ax
 
-    WF_PLATFORM_RET
+    IA16_RET

@@ -12,7 +12,7 @@
 .global sunl_loop
 .global sound_update_new_line
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 # ds - ram segment
 # es - song segment

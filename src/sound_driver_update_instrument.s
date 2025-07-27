@@ -11,7 +11,7 @@
 
 .global sound_instrument_change
 
-.section .text.sound_driver
+.section .fartext.sound_driver, "ax"
 
 sound_instrument_change:
 
