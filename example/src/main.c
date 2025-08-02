@@ -40,7 +40,8 @@ void main(void) {
 
 	i = 0;
 
-	//ws_mode_set(WS_MODE_COLOR_4BPP);
+	// attempt to set colour mode
+	ws_system_set_mode(WS_MODE_COLOR_4BPP);
 
 	//sound_set_wavetable_ram_address((unsigned char *)0xf00);
 
