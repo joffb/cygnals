@@ -56,28 +56,88 @@ make install
 
 This will put the libraries and include files for all targets into `/opt/wonderful/local/cygnals`
 
-Your project's makefile should be updated to
+### Updating your project Makefile
 
-+ add `-lcygnals` to the list of libraries on the line starting with `LIBS := `
-+ add `$(WONDERFUL_TOOLCHAIN)/local/cygnals/$(TARGET)` to the list of directories on the line starting with `LIBDIRS := `
+Starting from a Wonderful Toolchain template makefile, the following should be added
+
+Under the `# Source Code paths` section:
+
+```
+# CYGNALS: converter executable and paths
+FUR2WS := fur2ws
+MUSICDIR := music
+SFXDIR := sfx
+```
+
+At the end of the `# Libraries` section:
+
+```
+# CYGNALS: add libraries and libdirs
+LIBS	+=  -lcygnals
+LIBDIRS +=	$(WONDERFUL_TOOLCHAIN)/local/cygnals/$(TARGET)
+```
+
+At the end of the `# Source files` section:
+
+```
+# CYGNALS: find furnace files
+ifneq ($(MUSICDIR),)
+    SOURCES_MUSIC	:= $(shell find -L $(MUSICDIR) -name "*.fur")
+endif
+ifneq ($(SFXDIR),)
+    SOURCES_SFX	:= $(shell find -L $(SFXDIR) -name "*.fur")
+endif
+```
+
+At the end of the `# Intermediate build files` section:
+
+```
+# CYGNALS: add furnace files as targets
+OBJS	+= \
+        $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_MUSIC))) \
+		$(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_SFX)))
+
+```
+
+At the end of the `# Rules` section:
+
+```
+# CYGNALS: convert furnace files to asm and build them
+# different arguments for music and sfx
+$(BUILDDIR)/%.fur.o : %.fur
+	@echo "  PROCESS $<"
+	@$(MKDIR) -p $(@D)
+	@if [ $(@D) = $(BUILDDIR)/$(MUSICDIR) ]; then \
+		$(FUR2WS) --o $(BUILDDIR)/$*.s $< ;\
+	else \
+		$(FUR2WS) --s auto --o $(BUILDDIR)/$*.s $< ;\
+	fi
+	$(_V)$(CC) $(CFLAGS) -c -o $(BUILDDIR)/$*.fur.o $(BUILDDIR)/$*.s
+```
+
+Compare with `example\makefile` for what it should look like
 
 ### Converting
 
 You can convert a furnace song into an assembly language file as below:
 
 ```
-python3 json2ws.py -o src/mysong.s -i mysong ./song.fur
+fur2ws --o src/mysong.s --i mysong ./song.fur
 ```
 
-In this example, `-o` sets the output filename, `-i` sets the name of the variable which can be used to refer to the song, and the input furnace filename comes last.
+In this example, `--o` sets the output filename, `--i` sets the name of the symbol which can be used to refer to the song, and the input furnace filename comes last.
 
 You can convert a sound effect as below:
 
 ```
-python3 ../json2ws.py --sfx 2 -o src/mysfx.s -i mysfx ./mysfx.fur 
+fur2ws --s 2 --o src/mysfx.s --i mysfx ./mysfx.fur 
+```
+or
+```
+fur2ws --s auto --o src/mysfx.s --i mysfx ./mysfx.fur 
 ```
 
-The main difference here is `--sfx 2` which tells the converter to only look at channel 2 (indexed starting at 1). You can specify multiple channels like `--sfx 124` will export channels 1, 2 and 4.
+The main difference here is `--s` which enables sfx output. The first version with `--s 2` tells the converter to only look at channel 2 (indexed starting at 1). You can specify multiple channels like `--sfx 124` will export channels 1, 2 and 4. The second version uses `--s auto` which will figure out which channels should be included by ignoring any channels which are empty across all patterns.
 
 ### Variables
 
@@ -177,7 +237,8 @@ When creating an instrument in Furnace which uses samples you can either
     + the desired sample should be selected in the dropdown box on the Sample tab
 + use the "Generic Sample" instrument type
     + the desired sample should be selected in the dropdown box on the Sample tab
-The "Sample Map" and "Use Wavetable" features are not supported.
++ sample maps can also be used with both instrument types if the "Use sample map" option is ticked
+The "Use Wavetable" feature is not supported.
 
 ### ROM Usage
 To play back samples at pitches other than the basic C4 pitch, a new copy of the sample must be created which plays back at the correct speed for one of these sample rates. 
