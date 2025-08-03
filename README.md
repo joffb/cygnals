@@ -54,7 +54,15 @@ make
 make install
 ```
 
-This will put the libraries and include files for all targets into `/opt/wonderful/local/cygnals`
+This will put the libraries and include files for all Wonderful Toolchain targets into `/opt/wonderful/local/cygnals`
+
+## fur2ws Conversion tool
+
+The `fur2ws` program is used to convert from Furnace .fur files to .s assembly language files.
+
+Binaries of `fur2ws` for various platforms can be found in the `bin/` folder - you should add the appropriate directory to your PATH
+
+e.g. `export PATH="$PATH:~/wswan/cygnals/bin/linux_amd64"`
 
 ### Updating your project Makefile
 
@@ -115,11 +123,14 @@ $(BUILDDIR)/%.fur.o : %.fur
 	$(_V)$(CC) $(CFLAGS) -c -o $(BUILDDIR)/$*.fur.o $(BUILDDIR)/$*.s
 ```
 
-Compare with `example\makefile` for what it should look like
+Compare with `example\Makefile` for an example of what it should look like
 
 ### Converting
 
-You can convert a furnace song into an assembly language file as below:
+With the above Makefile changes, you can create `music` and `sfx` folders in the root directory of your project.
+Any Furnace files found in these folders will then be be automatically converted when `make` runs.
+
+You can also manually convert a furnace song into an assembly language file as below:
 
 ```
 fur2ws --o src/mysong.s --i mysong ./song.fur
