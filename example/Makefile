@@ -169,14 +169,14 @@ $(BUILDDIR)/%.lua.o : %.lua
 # CYGNALS: convert furnace files to asm and build them
 # different arguments for music and sfx
 $(BUILDDIR)/%.fur.o : %.fur
-	@echo "  PROCESS $<"
+	@echo "  CYGNALS $<"
 	@$(MKDIR) -p $(@D)
 	@if [ $(@D) = $(BUILDDIR)/$(MUSICDIR) ]; then \
 		$(FUR2WS) --o $(BUILDDIR)/$*.s $< ;\
 	else \
 		$(FUR2WS) --s auto --o $(BUILDDIR)/$*.s $< ;\
 	fi
-	$(_V)$(CC) $(CFLAGS) -c -o $(BUILDDIR)/$*.fur.o $(BUILDDIR)/$*.s
+	$(_V)$(CC) $(ASFLAGS) -c -o $(BUILDDIR)/$*.fur.o $(BUILDDIR)/$*.s
 
 
 # Include dependency files if they exist
