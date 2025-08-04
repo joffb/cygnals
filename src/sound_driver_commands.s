@@ -71,22 +71,40 @@ sunl_note_on:
     # move on command pointer
     add bx, 2
 
-    # set note-on, volume and pitch change event flags
-    or word ptr [si + CHANNEL_FLAGS], CHAN_FLAG_NOTE_ON | ((CHAN_FLAG2_VOLUME_CHANGE | CHAN_FLAG2_PITCH_CHANGED) << 8)
+    test byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
+    jnz sunlno_muted
+        
+        # set note-on, volume and pitch change event flags
+        or word ptr [si + CHANNEL_FLAGS], CHAN_FLAG_NOTE_ON | ((CHAN_FLAG2_VOLUME_CHANGE | CHAN_FLAG2_PITCH_CHANGED) << 8)
 
-    # is this ch2?
-    cmp byte ptr [si + CHANNEL_NUMBER], 0x1
-    jnz sunlno_not_ch2
+        # is this ch2?
+        cmp byte ptr [si + CHANNEL_NUMBER], 0x1
+        jnz sunlno_not_ch2
 
-        # is a sample playing?
-        test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
-        jz sunlno_not_ch2
+            # is a sample playing?
+            test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+            jz sunlno_not_ch2
 
+                push ax
+                call sound_sample_note_off
+                pop ax
+
+        sunlno_not_ch2:
+
+        # is this ch4?
+        cmp byte ptr [si + CHANNEL_NUMBER], 0x3
+        jnz sunlno_not_ch3
+
+            # reset lfsr
             push ax
-            call sound_sample_note_off
+            in al, WS_SOUND_NOISE_CTRL_PORT
+            or al, WS_SOUND_NOISE_CTRL_RESET
+            out WS_SOUND_NOISE_CTRL_PORT, al
             pop ax
 
-    sunlno_not_ch2:
+        sunlno_not_ch3:
+
+    sunlno_muted:
 
     # get midi note in al
     mov al, ah

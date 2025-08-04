@@ -52,7 +52,7 @@ sound_mute_channel:
     mov bx, [di + MUSIC_STATE_CHANNELS_PTR]
     add bx, ax
 
-    # set muted flag
+    # set muted flag and clear note-on flag
     or byte ptr [bx + CHANNEL_FLAGS], CHAN_FLAG_MUTED
     and byte ptr [bx + CHANNEL_FLAGS], ~CHAN_FLAG_NOTE_ON
 
@@ -108,7 +108,7 @@ sound_mute_channels:
         test ah, 0x1
         jz smc_cl_dont_mute
 
-            # set muted flag
+            # set muted flag and clear note-on flag
             or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
             and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_NOTE_ON
 
@@ -174,17 +174,13 @@ sound_unmute_channel:
     # clear muted flag
     and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_MUTED
 
-    # restore wavetable
-    mov al, [si + CHANNEL_WAVETABLE_NUM]
-    call sound_wavetable_change
-
     # restore noise control value
     mov [di + MUSIC_STATE_NOISE_MODE], al
     out WS_SOUND_NOISE_CTRL_PORT, al
 
     # is this channel 4?
     # restore noise mode value in sound control register
-    test dl, 0x3
+    cmp dl, 0x3
     jnz sunmc_not_ch4
 
         # get current register value
@@ -204,6 +200,10 @@ sound_unmute_channel:
 
     sunmc_not_ch4:
 
+    # restore wavetable
+    mov al, [si + CHANNEL_WAVETABLE_NUM]
+    call sound_wavetable_change
+    
     pop es
     pop si
     pop di
@@ -246,7 +246,7 @@ sound_unmute_all:
 
             # is this channel 4?
             # restore noise mode value in sound control register
-            test byte ptr [si + CHANNEL_NUMBER], 0x3
+            cmp byte ptr [si + CHANNEL_NUMBER], 0x3
             jnz sunmac_not_ch4
 
                 # get current register value

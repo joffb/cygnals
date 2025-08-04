@@ -43,7 +43,7 @@ sound_noise_mode_change:
         
         # get noise tap value with noise enable bit
         dec al
-        or al, WS_SOUND_NOISE_CTRL_ENABLE | WS_SOUND_NOISE_CTRL_RESET
+        or al, WS_SOUND_NOISE_CTRL_ENABLE
         mov [di + MUSIC_STATE_NOISE_MODE], al
         mov ah, al
 

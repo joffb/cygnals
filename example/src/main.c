@@ -57,8 +57,6 @@ void main(void) {
 	outportb(WS_SCR2_SCRL_X_PORT, 0);
 	outportb(WS_SCR2_SCRL_Y_PORT, 0);
 
-	screen_1[0] = 0;
-
 	// enable just screen_1
 	outportw(WS_DISPLAY_CTRL_PORT, WS_DISPLAY_CTRL_SCR1_ENABLE);
 
@@ -184,5 +182,11 @@ void main(void) {
 			}
 		}	
 		
+		// show whether the song channels are muted or playing
+		screen_1[0] = ((song_channels[0].flags & 1) ? 'M' : 'P') - 32 + 160;
+		screen_1[1] = ((song_channels[1].flags & 1) ? 'M' : 'P') - 32 + 160;
+		screen_1[2] = ((song_channels[2].flags & 1) ? 'M' : 'P') - 32 + 160;
+		screen_1[3] = ((song_channels[3].flags & 1) ? 'M' : 'P') - 32 + 160;
+
 	}
 }

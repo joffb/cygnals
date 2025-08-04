@@ -188,8 +188,8 @@ sound_sample_note_on:
     or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_NOTE_ON
 
     # running in colour mode?
-    in al, WS_SYSTEM_CTRL_COLOR_PORT
-    test al, WS_SYSTEM_CTRL_COLOR_FEAT_COLOR 
+    in al, WS_SYSTEM_CTRL_PORT
+    test al, WS_SYSTEM_CTRL_MODEL_COLOR 
     jnz ssno_colour_mode
         
         # mono mode, using interrupts
@@ -378,8 +378,8 @@ sound_sample_note_off:
     and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_NOTE_ON
 
     # running in colour mode?
-    in al, WS_SYSTEM_CTRL_COLOR_PORT
-    test al, WS_SYSTEM_CTRL_COLOR_FEAT_COLOR
+    in al, WS_SYSTEM_CTRL_PORT
+    test al, WS_SYSTEM_CTRL_MODEL_COLOR
     jnz ssnoff_colour_mode
 
         # mono mode
