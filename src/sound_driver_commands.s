@@ -74,20 +74,18 @@ sunl_note_on:
     test byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
     jnz sunlno_muted
         
-        # set note-on, volume and pitch change event flags
-        or word ptr [si + CHANNEL_FLAGS], CHAN_FLAG_NOTE_ON | ((CHAN_FLAG2_VOLUME_CHANGE | CHAN_FLAG2_PITCH_CHANGED) << 8)
+        push ax
 
         # is this ch2?
         cmp byte ptr [si + CHANNEL_NUMBER], 0x1
         jnz sunlno_not_ch2
 
             # is a sample playing?
-            test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+            in al, WS_SOUND_CH_CTRL_PORT
+            test al, WS_SOUND_CH_CTRL_CH2_VOICE
             jz sunlno_not_ch2
 
-                push ax
                 call sound_sample_note_off
-                pop ax
 
         sunlno_not_ch2:
 
@@ -96,13 +94,16 @@ sunl_note_on:
         jnz sunlno_not_ch3
 
             # reset lfsr
-            push ax
             in al, WS_SOUND_NOISE_CTRL_PORT
             or al, WS_SOUND_NOISE_CTRL_RESET
             out WS_SOUND_NOISE_CTRL_PORT, al
-            pop ax
 
         sunlno_not_ch3:
+
+        pop ax
+
+        # set note-on, volume and pitch change event flags
+        or word ptr [si + CHANNEL_FLAGS], CHAN_FLAG_NOTE_ON | ((CHAN_FLAG2_VOLUME_CHANGE | CHAN_FLAG2_PITCH_CHANGED) << 8)
 
     sunlno_muted:
 
