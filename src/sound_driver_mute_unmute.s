@@ -17,6 +17,7 @@
 
 .section .fartext.sound_driver, "ax"
 
+
 # ax : song_state pointer
 # returns
 # al : channels byte
@@ -175,7 +176,7 @@ sound_unmute_channel:
     and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_MUTED
 
     # restore noise control value
-    mov [di + MUSIC_STATE_NOISE_MODE], al
+    mov al, [di + MUSIC_STATE_NOISE_MODE]
     out WS_SOUND_NOISE_CTRL_PORT, al
 
     # is this channel 4?
@@ -274,7 +275,7 @@ sound_unmute_all:
         loopnz suall_loop
 
     # restore noise control value
-    mov [di + MUSIC_STATE_NOISE_MODE], al
+    mov al, [di + MUSIC_STATE_NOISE_MODE]
     out WS_SOUND_NOISE_CTRL_PORT, al
 
     pop es

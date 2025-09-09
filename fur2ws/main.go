@@ -110,7 +110,7 @@ func write_macros(outfile *os.File, macros []furnace2go.Macro, song_prefix strin
 		outfile.WriteString("\t.byte " + fmt.Sprint(macro_loop) + " # loop\n")
 		outfile.WriteString("\t.byte " + fmt.Sprint(macro.Data[macro.Length - 1].(uint8)) + " # last\n")
 		outfile.WriteString("\t.byte 0xff # pad\n")
-		outfile.WriteString("\t.word " + song_prefix + "_" + macro_prefix + "_macro_data_" + fmt.Sprint(i) + " # ptr\n")
+		outfile.WriteString("\t.word " + song_prefix + "_" + macro_prefix + "_macro_data_" + fmt.Sprint(i) + " - " + song_prefix + " # ptr\n")
 
 		outfile.WriteString("\n")
 	}
@@ -177,8 +177,8 @@ func main() {
 	flag.StringVar(&outfilename, "o", "", "output file name")
 	flag.StringVar(&song_prefix, "i", "", "variable name")
 	flag.StringVar(&sfx, "s", "", "SFX channels; auto to autodetect or string of channel numbers e.g. 12 for channels 1 & 2")
-	flag.StringVar(&song_data_prefix, "p", "fartext", "name used as .section prefix for song data")
-	flag.StringVar(&sample_data_prefix, "q", "fartext", "name used as .section prefix for sample data")
+	flag.StringVar(&song_data_prefix, "p", "farrodata", "name used as .section prefix for song data")
+	flag.StringVar(&sample_data_prefix, "q", "farrodata", "name used as .section prefix for sample data")
 
 	flag.Parse()
 
@@ -289,7 +289,7 @@ func main() {
     outfile.WriteString("\n")
 
     outfile.WriteString(".balign 16\n")
-    outfile.WriteString(".org 0\n")
+    //outfile.WriteString(".org 0\n")
 	outfile.WriteString("\n")
 
     bank_number := fmt.Sprint(0)
@@ -317,28 +317,28 @@ func main() {
     outfile.WriteString(".byte " + fmt.Sprint(song.OrdersLength) + "\n")
 	
     outfile.WriteString(song_prefix + "_" + "instrument_ptrs:\n")
-    outfile.WriteString(".short " + song_prefix + "_instrument_data" + "\n")
+    outfile.WriteString(".short " + song_prefix + "_instrument_data" + " - " + song_prefix + "\n")
 	
     outfile.WriteString(song_prefix + "_" + "order_ptrs:\n")
-    outfile.WriteString(".short " + song_prefix + "_orders" + "\n")
+    outfile.WriteString(".short " + song_prefix + "_orders" + " - " + song_prefix + "\n")
 	
     outfile.WriteString(song_prefix + "_" + "wavetables_ptr:\n")
-    outfile.WriteString(".short " + song_prefix + "_wavetables" + "\n")
+    outfile.WriteString(".short " + song_prefix + "_wavetables" + " - " + song_prefix + "\n")
 	
     outfile.WriteString(song_prefix + "_" + "sample_table_ptr:\n")
-    outfile.WriteString(".short " + song_prefix + "_sample_table" + "\n")
+    outfile.WriteString(".short " + song_prefix + "_sample_table" + " - " + song_prefix + "\n")
 	
     outfile.WriteString(song_prefix + "_" + "volume_macro_ptrs:\n")
-    outfile.WriteString(".short " + song_prefix + "_volume_macros" + "\n")
+    outfile.WriteString(".short " + song_prefix + "_volume_macros" + " - " + song_prefix + "\n")
 	
     outfile.WriteString(song_prefix + "_" + "wave_macro_ptrs:\n")
-    outfile.WriteString(".short " + song_prefix + "_wave_macros" + "\n")
+    outfile.WriteString(".short " + song_prefix + "_wave_macros" + " - " + song_prefix + "\n")
 	
     outfile.WriteString(song_prefix + "_" + "arp_macro_ptrs:\n")
-    outfile.WriteString(".short " + song_prefix + "_arp_macros" + "\n")
+    outfile.WriteString(".short " + song_prefix + "_arp_macros" + " - " + song_prefix + "\n")
 	
     outfile.WriteString(song_prefix + "_" + "ex_macro_ptrs:\n")
-    outfile.WriteString(".short " + song_prefix + "_ex_macros" + "\n")
+    outfile.WriteString(".short " + song_prefix + "_ex_macros" + " - " + song_prefix + "\n")
 	
     outfile.WriteString(song_prefix + "_" + "flags:\n")
     outfile.WriteString(".byte " + fmt.Sprint(song_flags) + "\n")
@@ -612,7 +612,7 @@ func main() {
 		outfile.WriteString(song_prefix + "_orders_ch_" + fmt.Sprintf("%d", i) + ":\n")
 	
 		for _, idx := range orders {		
-			outfile.WriteString("\t.short " + song_prefix + "_pattern_" + fmt.Sprintf("%d_%d", i, idx) + "\n")
+			outfile.WriteString("\t.short " + song_prefix + "_pattern_" + fmt.Sprintf("%d_%d", i, idx) + " - " + song_prefix + "\n")
 		}
 	}
 	

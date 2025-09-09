@@ -13,6 +13,7 @@
 
 .section .fartext.sound_driver, "ax"
 
+
 sound_update_arpeggio:
 
 	# load CHANNEL_ARPEGGIO_POS into al and CHANNEL_ARPEGGIO into ah

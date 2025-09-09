@@ -14,6 +14,7 @@
 
 .section .fartext.sound_driver, "ax"
 
+
 # al: wavetable number
 sound_wavetable_change:
 

@@ -13,6 +13,7 @@
 
 .section .fartext.sound_driver, "ax"
 
+
 .balign 2
 sunl_commands:
     .short sunl_note_on

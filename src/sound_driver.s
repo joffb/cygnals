@@ -40,13 +40,15 @@ sound_play:
     mov ss:[sound_ds_value], ds
 
     # es = song segment
-    mov es, dx
+    shr ax, 4
+    add ax, dx
+    mov es, ax
 
     # di = song state
     mov di, cx
 
     # save song's segment in song state
-    mov [di + MUSIC_STATE_SEGMENT], dx
+    mov [di + MUSIC_STATE_SEGMENT], ax
 
     # save channels pointer in song state
     mov [di + MUSIC_STATE_CHANNELS_PTR], bx

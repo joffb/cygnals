@@ -39,6 +39,7 @@
 
 .section .fartext.sound_driver, "ax"
 
+
 # return sound channel 2 voice volume
 sound_calc_sample_voice_volume:
     
