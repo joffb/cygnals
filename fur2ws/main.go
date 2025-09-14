@@ -102,8 +102,6 @@ func write_macros(outfile *os.File, macros []furnace2go.Macro, song_prefix strin
 		} else {
 			macro_loop = macro.Loop
 		}
-
-
 		
 		outfile.WriteString(song_prefix + "_" + macro_prefix + "_macro_" + fmt.Sprint(i) + ":\n")
 		outfile.WriteString("\t.byte " + fmt.Sprint(macro.Length) + " # length\n")
@@ -132,6 +130,44 @@ func write_macro_data(outfile *os.File, macros []furnace2go.Macro, song_prefix s
 	outfile.WriteString("\n")
 }
 
+func resample_data(in []any, ratio float64, looping bool) (out []any) {
+
+    var v0 float64
+    var v1 float64
+    var vnew float64
+    var ptr float64 = 0
+
+	// linear interpolation through sample
+    for (ptr < float64(len(in))) {
+
+        var p0 uint32 = uint32(math.Floor(ptr))
+
+        v0 = float64(in[p0].(int8))
+
+        if (p0 + 1) >= uint32(len(in)) {
+
+            // this doesn't loop, set second value to 0
+            if !looping {
+                v1 = float64(0)
+
+            // this does loop, set second value to the first sample
+            } else {
+                v1 = float64(in[0].(int8))
+            }
+
+        } else {
+            v1 = float64(in[p0 + 1].(int8))
+        }
+
+        vnew = (v0 * math.Mod(ptr, 1)) + (v1 * (1.0 - math.Mod(ptr, 1)))
+
+        out = append(out, int8(vnew))
+        ptr = ptr + ratio
+	}
+
+    return out
+}
+
 func resample(sample furnace2go.Sample, note_number uint8) (outsample furnace2go.Sample) {
 
     var c4_freq float64 = 130
@@ -153,14 +189,7 @@ func resample(sample furnace2go.Sample, note_number uint8) (outsample furnace2go
         Data: []any{},
     }
 
-    var ptr float64 = 0
-    
-	// linear interpolation through sample
-    for (ptr < float64(sample.Length)) {
-        outsample.Data = append(outsample.Data, sample.Data[uint32(math.Floor(ptr))])
-        ptr = ptr + ratio
-	}
-
+    outsample.Data = resample_data(sample.Data, ratio, sample.LoopStart != 0xffffffff)    
     outsample.Length = uint32(len(outsample.Data))
 
 	return outsample
@@ -412,18 +441,12 @@ func main() {
 			
             // linear interpolation
             var ratio = float64(sample.C4Rate)/new_rate
-            var data = []any{}
-            var ptr float64 = 0
+
+            sample.Data = resample_data(sample.Data, ratio, sample.LoopStart != 0xffffffff)    
 
             print(" * sample " + fmt.Sprint(i) + " resampling from " + fmt.Sprint(sample.C4Rate) + "hz to " + fmt.Sprint(new_rate) + "hz\n")
-            
-            for (uint32(ptr) < sample.Length) {
-                data = append(data, sample.Data[uint32(math.Floor(ptr))].(int8))
-                ptr = ptr + ratio
-			}
 
-            sample.Length = uint32(len(data))
-            sample.Data = data
+            sample.Length = uint32(len(sample.Data))
             sample.C4Rate = uint32(new_rate)
             sample.CompatRate = uint32(new_rate)
 			
@@ -1005,10 +1028,13 @@ func main() {
     outfile.WriteString(".balign 2\n")
     outfile.WriteString(song_prefix + "_sample_table:\n")
 
-    // ensure the last sample is 0
+    // ensure the last sample is 0 when the sample is not looping
     for i = 0; i < uint32(len(song.Samples)); i++ {
-        song.Samples[i].Length += 1
-        song.Samples[i].Data = append(song.Samples[i].Data, int8(-128))
+
+        if song.Samples[i].LoopStart == 0xffffffff {
+            song.Samples[i].Length += 1
+            song.Samples[i].Data = append(song.Samples[i].Data, int8(-128))
+        }
 	}
 
     // sample table with addresses and lengths
