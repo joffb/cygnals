@@ -235,7 +235,7 @@ sunl_wavetable_change:
 # si - channel pointer
 sunl_noise_mode:
 
-    # get new noise mode
+    # get new noise mode in al and store in state
     mov al, ah
     mov [di + MUSIC_STATE_NOISE_MODE], al
 

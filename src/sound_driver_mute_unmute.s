@@ -175,29 +175,14 @@ sound_unmute_channel:
     # clear muted flag
     and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_MUTED
 
-    # restore noise control value
-    mov al, [di + MUSIC_STATE_NOISE_MODE]
-    out WS_SOUND_NOISE_CTRL_PORT, al
-
     # is this channel 4?
     # restore noise mode value in sound control register
     cmp dl, 0x3
     jnz sunmc_not_ch4
 
-        # get current register value
-        in al, WS_SOUND_CH_CTRL_PORT
-        and al, ~WS_SOUND_CH_CTRL_CH4_NOISE
-
-        # should noise be on?
-        test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_NOISE_ON
-        jz sunmc_noise_off
-
-            or al, WS_SOUND_CH_CTRL_CH4_NOISE
-
-        sunmc_noise_off:
-
-        # update register
-        out WS_SOUND_CH_CTRL_PORT, al
+        # restore noise control value
+        mov al, [di + MUSIC_STATE_NOISE_MODE]
+        call sound_noise_mode_change
 
     sunmc_not_ch4:
 
@@ -250,20 +235,9 @@ sound_unmute_all:
             cmp byte ptr [si + CHANNEL_NUMBER], 0x3
             jnz sunmac_not_ch4
 
-                # get current register value
-                in al, WS_SOUND_CH_CTRL_PORT
-                and al, ~WS_SOUND_CH_CTRL_CH4_NOISE
-
-                # should noise be on?
-                test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_NOISE_ON
-                jz sunmac_noise_off
-
-                    or al, WS_SOUND_CH_CTRL_CH4_NOISE
-
-                sunmac_noise_off:
-
-                # update register
-                out WS_SOUND_CH_CTRL_PORT, al
+                # restore noise control value
+                mov al, [di + MUSIC_STATE_NOISE_MODE]
+                call sound_noise_mode_change
 
             sunmac_not_ch4:
 
@@ -273,10 +247,6 @@ sound_unmute_all:
         add si, CHANNEL_SIZE
         
         loopnz suall_loop
-
-    # restore noise control value
-    mov al, [di + MUSIC_STATE_NOISE_MODE]
-    out WS_SOUND_NOISE_CTRL_PORT, al
 
     pop es
     pop si
