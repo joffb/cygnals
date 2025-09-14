@@ -132,34 +132,44 @@ func write_macro_data(outfile *os.File, macros []furnace2go.Macro, song_prefix s
 
 func resample_data(in []any, ratio float64, looping bool) (out []any) {
 
-    var v0 float64
-    var v1 float64
     var vnew float64
     var ptr float64 = 0
 
 	// linear interpolation through sample
     for (ptr < float64(len(in))) {
 
+		// offsets of two points to interpolate
         var p0 uint32 = uint32(math.Floor(ptr))
+		var p1 uint32 = uint32(math.Floor(ptr + ratio))
 
+		// values at two offsets
+		var v0 float64
+		var v1 float64
+
+		// first value
         v0 = float64(in[p0].(int8))
 
-        if (p0 + 1) >= uint32(len(in)) {
+		// check if second sample offset is outside bounds of source 
+        if p1 >= uint32(len(in)) {
 
             // this doesn't loop, set second value to 0
             if !looping {
+				
                 v1 = float64(0)
 
-            // this does loop, set second value to the first sample
+            // this does loop, set second value to wrapped sample
             } else {
-                v1 = float64(in[0].(int8))
+
+                v1 = float64(in[p1 % uint32(len(in))].(int8))
+
             }
 
+		// sample offset is inside bounds of source
         } else {
-            v1 = float64(in[p0 + 1].(int8))
+            v1 = float64(in[p1].(int8))
         }
 
-        vnew = (v0 * math.Mod(ptr, 1)) + (v1 * (1.0 - math.Mod(ptr, 1)))
+        vnew = (v0 * (1.0 - math.Mod(ptr, 1))) + (v1 * math.Mod(ptr, 1))
 
         out = append(out, int8(vnew))
         ptr = ptr + ratio
