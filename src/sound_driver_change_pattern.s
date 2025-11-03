@@ -70,6 +70,6 @@ sound_update_change_pattern:
     mov [di + MUSIC_STATE_LINE], al
 
     # set signal that we need to process the next line
-    or byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_PROCESS_NEW_LINE
+    or byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_PROCESS_NEW_LINE
 
     ret

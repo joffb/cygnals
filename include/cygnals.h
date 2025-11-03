@@ -3,12 +3,12 @@
 #ifndef _SOUND_DEFINES_H
 #define _SOUND_DEFINES_H
 
-#define STATE_FLAG_PROCESS_NEW_LINE 0x1
-#define STATE_FLAG_LOOP 0x2
-#define STATE_FLAG_SFX 0x4
-#define STATE_FLAG_PLAYING 0x8
-#define STATE_FLAG_SAMPLE_PLAYING 0x10
-#define STATE_FLAG_NOISE_ON 0x20
+#define CYG_STATE_FLAG_PROCESS_NEW_LINE 0x1
+#define CYG_STATE_FLAG_LOOP 0x2
+#define CYG_STATE_FLAG_SFX 0x4
+#define CYG_STATE_FLAG_PLAYING 0x8
+#define CYG_STATE_FLAG_SAMPLE_PLAYING 0x10
+#define CYG_STATE_FLAG_NOISE_ON 0x20
 
 
 #ifndef __ASSEMBLER__
@@ -93,23 +93,23 @@ typedef struct {
 	channel_t * channels_ptr;
 } music_state_t;
 
-void sound_play(const unsigned char __far *song, music_state_t *song_state, channel_t *song_channels);
-void sound_update(music_state_t *song_state);
-void sound_stop(music_state_t *song_state);
-void sound_resume(music_state_t *song_state);
+void cygnals_play(const unsigned char __far *song, music_state_t *song_state, channel_t *song_channels);
+void cygnals_update(music_state_t *song_state);
+void cygnals_stop(music_state_t *song_state);
+void cygnals_resume(music_state_t *song_state);
 
-unsigned char sound_get_channels(music_state_t *song_state);
-void sound_mute_channel(music_state_t *song_state, unsigned char channel);
-void sound_mute_channels(music_state_t *song_state, unsigned char channels);
-void sound_unmute_channel(music_state_t *song_state, unsigned char channel);
-void sound_unmute_all(music_state_t *song_state);
+unsigned char cygnals_get_channels(music_state_t *song_state);
+void cygnals_mute_channel(music_state_t *song_state, unsigned char channel);
+void cygnals_mute_channels(music_state_t *song_state, unsigned char channels);
+void cygnals_unmute_channel(music_state_t *song_state, unsigned char channel);
+void cygnals_unmute_all(music_state_t *song_state);
 
-void sound_set_master_volume(music_state_t *song_state, unsigned char volume);
+void cygnals_set_master_volume(music_state_t *song_state, unsigned char volume);
 
-void sound_enable_looping(music_state_t *song_state);
-void sound_disable_looping(music_state_t *song_state);
+void cygnals_enable_looping(music_state_t *song_state);
+void cygnals_disable_looping(music_state_t *song_state);
 
-void sound_set_wavetable_ram_address(unsigned char ws_iram *address);
+void cygnals_set_wavetable_ram_address(unsigned char *address);
 
 #endif
 
@@ -137,9 +137,9 @@ void sound_set_wavetable_ram_address(unsigned char ws_iram *address);
 	#define CHAN_FLAG2_PITCH_CHANGED 0x40
 	#define CHAN_FLAG2_VOLUME_CHANGE 0x80
 
-	#define BANJO_MAGIC_BYTE 0xba
+	#define CYG_MAGIC_BYTE 0xba
 
-	#ifdef __WONDERFUL_WWITCH__
+	#ifdef __WONDERFUL_WWITCH
 		#define WAVETABLE_WRAM 0x180
 	#else
 		#define WAVETABLE_WRAM 0xec0

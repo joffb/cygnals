@@ -23,7 +23,7 @@ sound_update_channel_volume:
 
 	# sample playing?
 	# sample channel?
-	test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+	test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
 	jz sucv_no_sample
 
 		cmp byte ptr [si + CHANNEL_NUMBER], 1

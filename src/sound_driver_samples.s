@@ -119,7 +119,7 @@ sound_sample_update_interrupt:
 
             # clear sample playing flag
             mov bx, [sound_sample_state_ptr]
-            and byte ptr [bx + MUSIC_STATE_FLAGS], ~STATE_FLAG_SAMPLE_PLAYING
+            and byte ptr [bx + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_SAMPLE_PLAYING
 
             # acknowledge interrupt
             mov al, WS_INT_ACK_HBL_TIMER
@@ -228,7 +228,7 @@ sound_sample_note_on:
             out WS_TIMER_CTRL_PORT, al
 
             # clear sample playing flag
-            and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_SAMPLE_PLAYING
+            and byte ptr [di + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_SAMPLE_PLAYING
 
             pop bx
 
@@ -309,7 +309,7 @@ sound_sample_note_on:
         out WS_INT_ENABLE_PORT, al
 
         # set sample playing flag
-        or byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+        or byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
 
         pop bx
 
@@ -354,7 +354,7 @@ sound_sample_note_on:
         out WS_SOUND_VOICE_VOL_PORT, al
 
         # set sample playing flag
-        or byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+        or byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
 
         pop bx
 
@@ -368,7 +368,7 @@ sound_sample_note_on:
 sound_sample_note_off:
 
     # clear sample playing flag
-    and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_SAMPLE_PLAYING
+    and byte ptr [di + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_SAMPLE_PLAYING
 
     # clear note-on
     and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_NOTE_ON

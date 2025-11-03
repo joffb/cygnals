@@ -25,7 +25,7 @@ sound_noise_mode_change:
         and al, ~WS_SOUND_CH_CTRL_CH4_NOISE
 
         # update noise flag in state
-        and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_NOISE_ON
+        and byte ptr [di + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_NOISE_ON
 
         # don't actually update value on chip if channel muted
         test byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
@@ -48,7 +48,7 @@ sound_noise_mode_change:
         mov ah, al
 
         # update noise flag in state
-        or byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_NOISE_ON
+        or byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_NOISE_ON
 
         # don't actually update value on chip if channel muted
         test byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED

@@ -9,12 +9,11 @@
 .arch i186
 .intel_syntax noprefix
 
-.global sound_play
-.global sound_update
-.global sound_stop
-.global sound_resume
-
-.global sound_set_wavetable_ram_address
+.global cygnals_play
+.global cygnals_update
+.global cygnals_stop
+.global cygnals_resume
+.global cygnals_set_wavetable_ram_address
 
 .global sound_wavetable_ram_ptr
 
@@ -24,7 +23,7 @@ sound_wavetable_ram_ptr: .word WAVETABLE_WRAM
 
 .section .fartext.sound_driver, "ax"
 
-sound_play:
+cygnals_play:
 
     # get channels pointer into bx from stack
     push bp
@@ -54,7 +53,7 @@ sound_play:
     mov [di + MUSIC_STATE_CHANNELS_PTR], bx
 
     # check for a magic byte at the start of the segment
-    cmp byte ptr es:[SONG_HEADER_MAGIC_BYTE], BANJO_MAGIC_BYTE
+    cmp byte ptr es:[SONG_HEADER_MAGIC_BYTE], CYG_MAGIC_BYTE
     jnz sound_play_done
 
     # copy song header from rom into ram
@@ -120,7 +119,7 @@ sound_play:
     # initialise sound chip stuff
 
     # don't mute channels and initialise wavetables for sfx
-    test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SFX
+    test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SFX
     jnz sound_play_done
 
         # enable channels 0-3
@@ -216,20 +215,20 @@ sound_init_channel:
     ret
 
 # ax: song state pointer
-sound_stop:
+cygnals_stop:
 
     push di
 
     # is a song currently playing?
     mov di, ax
-    test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_PLAYING
+    test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_PLAYING
     jz sound_stop_done
 
         # clear playing flag
-        and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_PLAYING
+        and byte ptr [di + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_PLAYING
 
         # is a sample playing?
-        test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+        test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
         jz ss_no_sample_playing
 
             call sound_sample_note_off
@@ -250,15 +249,15 @@ sound_stop:
     IA16_RET
 
 # ax: song state pointer
-sound_resume:
+cygnals_resume:
 
     mov bx, ax
-    or byte ptr [bx + MUSIC_STATE_FLAGS], STATE_FLAG_PLAYING
+    or byte ptr [bx + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_PLAYING
 
     IA16_RET
 
 # ax: wavetable ram address
-sound_set_wavetable_ram_address:
+cygnals_set_wavetable_ram_address:
 
     mov [sound_wavetable_ram_ptr], ax
 

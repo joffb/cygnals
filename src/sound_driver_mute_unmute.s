@@ -9,11 +9,11 @@
 .arch i186
 .intel_syntax noprefix
 
-.global sound_get_channels
-.global sound_mute_channel
-.global sound_unmute_channel
-.global sound_unmute_all
-.global sound_mute_channels
+.global cygnals_get_channels
+.global cygnals_mute_channel
+.global cygnals_unmute_channel
+.global cygnals_unmute_all
+.global cygnals_mute_channels
 
 .section .fartext.sound_driver, "ax"
 
@@ -21,7 +21,7 @@
 # ax : song_state pointer
 # returns
 # al : channels byte
-sound_get_channels:
+cygnals_get_channels:
 
     push di
     push es
@@ -38,7 +38,7 @@ sound_get_channels:
 
 # ax : song state pointer
 # dl : channel
-sound_mute_channel:
+cygnals_mute_channel:
 
     push di
 
@@ -62,7 +62,7 @@ sound_mute_channel:
     jnz smc_not_ch2
 
         # sample playing?
-        test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+        test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
         jz smc_not_ch2
 
             # stop sample playback
@@ -82,7 +82,7 @@ sound_mute_channel:
 
 # ax: song state pointer
 # dl: channels byte
-sound_mute_channels:
+cygnals_mute_channels:
 
     push di
     push si
@@ -125,7 +125,7 @@ sound_mute_channels:
             jnz smc_loop_not_ch2
 
                 # is a sample playing?
-                test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+                test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
                 jz smc_loop_not_ch2
 
                     push ax
@@ -152,7 +152,7 @@ sound_mute_channels:
 
 # ax : song state pointer
 # dl : channel
-sound_unmute_channel:
+cygnals_unmute_channel:
 
     push di
     push si
@@ -197,7 +197,7 @@ sound_unmute_channel:
     IA16_RET
 
 # ax : song state pointer
-sound_unmute_all:
+cygnals_unmute_all:
 
     push di
     push si

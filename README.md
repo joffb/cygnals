@@ -167,17 +167,17 @@ channel_t song_channels[4] __attribute__ ((aligned (2)));
 
 Note that `__attribute__ ((aligned (2)))` is used so that the variables are allocated on a word (2 byte) boundary which results in faster execution in places.
 
-You can then play back a song using the state, the channels and a far pointer to the song data like this: `sound_play(song_ptr, &song_state, song_channels);`
+You can then play back a song using the state, the channels and a far pointer to the song data like this: `cygnals_play(song_ptr, &song_state, song_channels);`
 
 Most functions require the song's state to be passed in, but the channels pointer only needs to be passed in that once.
 
-Every frame, you should run `sound_update(&song_state);` which will move the song's state along, update all of the channels and write updates to the Wonderswan's sound chip.
+Every frame, you should run `cygnals_update(&song_state);` which will move the song's state along, update all of the channels and write updates to the Wonderswan's sound chip.
 
-By default songs will loop, but this can be changed with the `sound_enable_looping(music_state_t *song_state);` and `sound_disable_looping(music_state_t *song_state);` functions.
+By default songs will loop, but this can be changed with the `cygnals_enable_looping(music_state_t *song_state);` and `cygnals_disable_looping(music_state_t *song_state);` functions.
 
-A song can be stopped with `sound_stop(&song_state);` which will mute the sound channels and further executions of `sound_update(&song_state);` will do nothing.
+A song can be stopped with `cygnals_stop(&song_state);` which will mute the sound channels and further executions of `cygnals_update(&song_state);` will do nothing.
 
-A stopped song can be resumed from where it was with `sound_resume(&song_state);`.
+A stopped song can be resumed from where it was with `cygnals_resume(&song_state);`.
 
 ### Sound effects (sfx)
 Sound effects (i.e. for scoring, jumping or weapon shots) or "sfx" can be played back in the same way as songs. You need to make variables for the sfx's state and for the maximum number of channels you will be using for effects. The number of channels should be stuck to, as an sfx playing back on more channels than there is RAM allocated could overwrite other stuff in RAM!
@@ -193,28 +193,28 @@ music_state_t sfx_state __attribute__ ((aligned (2)));
 channel_t sfx_channels[1] __attribute__ ((aligned (2)));
 ```
 
-You can then play back the sfx like this: `sound_play(sfx_test, &sfx_state, sfx_channels);`
+You can then play back the sfx like this: `cygnals_play(sfx_test, &sfx_state, sfx_channels);`
 
 By default sfx do not loop but this can be changed as above.
 
 When music is already playing, you will need to mute the channels which the sfx uses
-+ If your sfx will always be on a given channel, you can do `sound_mute_channel(&song_state, 3);` which will mute the fourth channel (channels are zero-indexed for this function).
-+ If your sfx uses variable or multiple channels, you can do `sound_mute_channels(&song_state, sound_get_channels(&sfx_state));` which will mute the song state's channels which are used by the sfx state. `sound_mute_channels` takes a byte which has the number of channels in the upper nibble, and the channels to mute in the lower nibble, each one being represented by one bit of the nibble.
++ If your sfx will always be on a given channel, you can do `cygnals_mute_channel(&song_state, 3);` which will mute the fourth channel (channels are zero-indexed for this function).
++ If your sfx uses variable or multiple channels, you can do `cygnals_mute_channels(&song_state, cygnals_get_channels(&sfx_state));` which will mute the song state's channels which are used by the sfx state. `cygnals_mute_channels` takes a byte which has the number of channels in the upper nibble, and the channels to mute in the lower nibble, each one being represented by one bit of the nibble.
 
 To update the sfx and unmute the song's channels when it's finished, you can do something like this once per frame:
 
 ```
 // is there an sfx playing?
-if (sfx_state.flags & STATE_FLAG_PLAYING)
+if (sfx_state.flags & CYG_STATE_FLAG_PLAYING)
 {
     // update it
-    sound_update(&sfx_state);
+    cygnals_update(&sfx_state);
 
     // is the sfx no longer playing?
-    if (!(sfx_state.flags & STATE_FLAG_PLAYING))
+    if (!(sfx_state.flags & CYG_STATE_FLAG_PLAYING))
     {
         // unmute all muted channels
-        sound_unmute_all(&song_state);
+        cygnals_unmute_all(&song_state);
     }
 }
 ```
@@ -222,12 +222,12 @@ if (sfx_state.flags & STATE_FLAG_PLAYING)
 ### Master Volume
 The Master Volume parameter can globally change a song's volume (e.g. for fading in and out) e.g.
 
-`sound_set_master_volume(song_state, 72);`
+`cygnals_set_master_volume(song_state, 72);`
 
 Values above 128 (0x80) are treated as maximum volume, values below that will make the volume quieter.
 
 ### Wavetables
-The location of the Wavetables in ram defaults to address 0x0EC0 but can be changed with the `sound_set_wavetable_ram_address` function e.g. `sound_set_wavetable_ram_address((unsigned char *)0xf00);`
+The location of the Wavetables in ram defaults to address 0x0EC0 but can be changed with the `cygnals_set_wavetable_ram_address` function e.g. `cygnals_set_wavetable_ram_address((unsigned char *)0xf00);`
 
 ## Sample Playback
 Samples can be played back on both Mono and Colour Wonderswans.
