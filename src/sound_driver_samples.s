@@ -39,6 +39,7 @@
 
 .section .fartext.sound_driver, "ax"
 
+
 # return sound channel 2 voice volume
 sound_calc_sample_voice_volume:
     
@@ -116,14 +117,9 @@ sound_sample_update_interrupt:
             xor al, al
             out WS_SOUND_VOL_CH2_PORT, al
 
-            # disable voice mode
-            in al, WS_SOUND_CH_CTRL_PORT
-            and al, ~WS_SOUND_CH_CTRL_CH2_VOICE
-            out WS_SOUND_CH_CTRL_PORT, al
-
             # clear sample playing flag
             mov bx, [sound_sample_state_ptr]
-            and byte ptr [bx + MUSIC_STATE_FLAGS], ~STATE_FLAG_SAMPLE_PLAYING
+            and byte ptr [bx + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_SAMPLE_PLAYING
 
             # acknowledge interrupt
             mov al, WS_INT_ACK_HBL_TIMER
@@ -188,8 +184,8 @@ sound_sample_note_on:
     or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_NOTE_ON
 
     # running in colour mode?
-    in al, WS_SYSTEM_CTRL_COLOR_PORT
-    test al, WS_SYSTEM_CTRL_COLOR_FEAT_COLOR 
+    in al, WS_SYSTEM_CTRL_PORT
+    test al, WS_SYSTEM_CTRL_MODEL_COLOR 
     jnz ssno_colour_mode
         
         # mono mode, using interrupts
@@ -232,7 +228,7 @@ sound_sample_note_on:
             out WS_TIMER_CTRL_PORT, al
 
             # clear sample playing flag
-            and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_SAMPLE_PLAYING
+            and byte ptr [di + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_SAMPLE_PLAYING
 
             pop bx
 
@@ -313,7 +309,7 @@ sound_sample_note_on:
         out WS_INT_ENABLE_PORT, al
 
         # set sample playing flag
-        or byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+        or byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
 
         pop bx
 
@@ -358,7 +354,7 @@ sound_sample_note_on:
         out WS_SOUND_VOICE_VOL_PORT, al
 
         # set sample playing flag
-        or byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+        or byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
 
         pop bx
 
@@ -372,14 +368,14 @@ sound_sample_note_on:
 sound_sample_note_off:
 
     # clear sample playing flag
-    and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_SAMPLE_PLAYING
+    and byte ptr [di + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_SAMPLE_PLAYING
 
     # clear note-on
     and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_NOTE_ON
 
     # running in colour mode?
-    in al, WS_SYSTEM_CTRL_COLOR_PORT
-    test al, WS_SYSTEM_CTRL_COLOR_FEAT_COLOR
+    in al, WS_SYSTEM_CTRL_PORT
+    test al, WS_SYSTEM_CTRL_MODEL_COLOR
     jnz ssnoff_colour_mode
 
         # mono mode
@@ -416,11 +412,6 @@ sound_sample_note_off:
         # stop SDMA
         xor al, al
         out WS_SDMA_CTRL_PORT, al
-
-        # clear ch2 voice mode bit
-        in al, WS_SOUND_CH_CTRL_PORT
-        and al, ~WS_SOUND_CH_CTRL_CH2_VOICE
-        out WS_SOUND_CH_CTRL_PORT, al
 
         # set ch2 volume/sample to 0
         xor al, al

@@ -19,6 +19,11 @@ SOURCEDIRS	:= src
 ASSETDIRS	:= assets
 CBINDIRS	:= cbin
 
+# CYGNALS: converter executable and paths
+FUR2WS := fur2ws
+MUSICDIR := music
+SFXDIR := sfx
+
 # Defines passed to all files
 # ---------------------------
 
@@ -27,8 +32,12 @@ DEFINES		:=
 # Libraries
 # ---------
 
-LIBS		:= -lwsx -lws -lcygnals
-LIBDIRS		:= $(WF_ARCH_LIBDIRS) $(WONDERFUL_TOOLCHAIN)/local/cygnals/$(TARGET)
+LIBS		:= -lwsx -lws
+LIBDIRS		:= $(WF_ARCH_LIBDIRS) 
+
+# CYGNALS: add libraries and libdirs
+LIBS	+=  -lcygnals
+LIBDIRS +=	$(WONDERFUL_TOOLCHAIN)/local/cygnals/$(TARGET)
 
 # Build artifacts
 # ---------------
@@ -60,6 +69,14 @@ ifneq ($(CBINDIRS),)
 endif
 SOURCES_S	:= $(shell find -L $(SOURCEDIRS) -name "*.s")
 SOURCES_C	:= $(shell find -L $(SOURCEDIRS) -name "*.c")
+
+# CYGNALS: find furnace files
+ifneq ($(MUSICDIR),)
+    SOURCES_MUSIC	:= $(shell find -L $(MUSICDIR) -name "*.fur")
+endif
+ifneq ($(SFXDIR),)
+    SOURCES_SFX	:= $(shell find -L $(SFXDIR) -name "*.fur")
+endif
 
 # Compiler and linker flags
 # -------------------------
@@ -94,6 +111,12 @@ OBJS_SOURCES	:= $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_S))) \
 OBJS		:= $(OBJS_ASSETS) $(OBJS_SOURCES)
 
 DEPS		:= $(OBJS:.o=.d)
+
+# CYGNALS: add furnace files as targets
+OBJS	+= \
+        $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_MUSIC))) \
+		$(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_SFX)))
+
 
 # Targets
 # -------
@@ -142,6 +165,19 @@ $(BUILDDIR)/%.lua.o : %.lua
 	@$(MKDIR) -p $(@D)
 	$(_V)$(WF)/bin/wf-process -o $(BUILDDIR)/$*.s -t $(TARGET) --depfile $(BUILDDIR)/$*.lua.d --depfile-target $(BUILDDIR)/$*.lua.o $<
 	$(_V)$(CC) $(CFLAGS) -c -o $(BUILDDIR)/$*.lua.o $(BUILDDIR)/$*.s
+
+# CYGNALS: convert furnace files to asm and build them
+# different arguments for music and sfx
+$(BUILDDIR)/%.fur.o : %.fur
+	@echo "  CYGNALS $<"
+	@$(MKDIR) -p $(@D)
+	@if [ $(@D) = $(BUILDDIR)/$(MUSICDIR) ]; then \
+		$(FUR2WS) --o $(BUILDDIR)/$*.s $< ;\
+	else \
+		$(FUR2WS) --s auto --o $(BUILDDIR)/$*.s $< ;\
+	fi
+	$(_V)$(CC) $(ASFLAGS) -c -o $(BUILDDIR)/$*.fur.o $(BUILDDIR)/$*.s
+
 
 # Include dependency files if they exist
 # --------------------------------------

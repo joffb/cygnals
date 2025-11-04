@@ -9,14 +9,13 @@
 .arch i186
 .intel_syntax noprefix
 
-.global sound_set_master_volume
-.global sound_set_master_volume_fade
+.global cygnals_set_master_volume
 
 .section .fartext.sound_driver, "ax"
 
 # ax : song state pointer
 # dl : volume
-sound_set_master_volume:
+cygnals_set_master_volume:
 
     push si
     push di

@@ -25,7 +25,7 @@ sound_noise_mode_change:
         and al, ~WS_SOUND_CH_CTRL_CH4_NOISE
 
         # update noise flag in state
-        and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_NOISE_ON
+        and byte ptr [di + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_NOISE_ON
 
         # don't actually update value on chip if channel muted
         test byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
@@ -42,26 +42,26 @@ sound_noise_mode_change:
     snmc_noise_on:
         
         # get noise tap value with noise enable bit
+        # and reset lsfr while we're here
         dec al
-        or al, WS_SOUND_NOISE_CTRL_ENABLE | WS_SOUND_NOISE_CTRL_RESET
-        mov [di + MUSIC_STATE_NOISE_MODE], al
+        or al, WS_SOUND_NOISE_CTRL_RESET | WS_SOUND_NOISE_CTRL_ENABLE
         mov ah, al
 
-        # set ch4 noise bit
-        in al, WS_SOUND_CH_CTRL_PORT
-        or al, WS_SOUND_CH_CTRL_CH4_NOISE
-
         # update noise flag in state
-        or byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_NOISE_ON
+        or byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_NOISE_ON
 
         # don't actually update value on chip if channel muted
         test byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
         jnz snmc_on_muted
 
             # output to sound control port
+            
+            # set ch4 noise bit
+            in al, WS_SOUND_CH_CTRL_PORT
+            or al, WS_SOUND_CH_CTRL_CH4_NOISE
             out WS_SOUND_CH_CTRL_PORT, al
 
-            # output to noise control port
+            # output tap & noise enable to noise control port
             mov al, ah
             out WS_SOUND_NOISE_CTRL_PORT, al
 

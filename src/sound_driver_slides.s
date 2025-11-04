@@ -13,6 +13,7 @@
 
 .section .fartext.sound_driver, "ax"
 
+
 sound_update_slide:
 
     # get slide type

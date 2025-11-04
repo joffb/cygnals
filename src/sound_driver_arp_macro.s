@@ -13,6 +13,7 @@
 
 .section .fartext.sound_driver, "ax"
 
+
 sound_update_arp_macro:
 
 	push bx

@@ -9,18 +9,19 @@
 .arch i186
 .intel_syntax noprefix
 
-.global sound_get_channels
-.global sound_mute_channel
-.global sound_unmute_channel
-.global sound_unmute_all
-.global sound_mute_channels
+.global cygnals_get_channels
+.global cygnals_mute_channel
+.global cygnals_unmute_channel
+.global cygnals_unmute_all
+.global cygnals_mute_channels
 
 .section .fartext.sound_driver, "ax"
+
 
 # ax : song_state pointer
 # returns
 # al : channels byte
-sound_get_channels:
+cygnals_get_channels:
 
     push di
     push es
@@ -37,7 +38,7 @@ sound_get_channels:
 
 # ax : song state pointer
 # dl : channel
-sound_mute_channel:
+cygnals_mute_channel:
 
     push di
 
@@ -52,7 +53,7 @@ sound_mute_channel:
     mov bx, [di + MUSIC_STATE_CHANNELS_PTR]
     add bx, ax
 
-    # set muted flag
+    # set muted flag and clear note-on flag
     or byte ptr [bx + CHANNEL_FLAGS], CHAN_FLAG_MUTED
     and byte ptr [bx + CHANNEL_FLAGS], ~CHAN_FLAG_NOTE_ON
 
@@ -61,7 +62,7 @@ sound_mute_channel:
     jnz smc_not_ch2
 
         # sample playing?
-        test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+        test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
         jz smc_not_ch2
 
             # stop sample playback
@@ -81,7 +82,7 @@ sound_mute_channel:
 
 # ax: song state pointer
 # dl: channels byte
-sound_mute_channels:
+cygnals_mute_channels:
 
     push di
     push si
@@ -108,7 +109,7 @@ sound_mute_channels:
         test ah, 0x1
         jz smc_cl_dont_mute
 
-            # set muted flag
+            # set muted flag and clear note-on flag
             or byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
             and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_NOTE_ON
 
@@ -124,7 +125,7 @@ sound_mute_channels:
             jnz smc_loop_not_ch2
 
                 # is a sample playing?
-                test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SAMPLE_PLAYING
+                test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
                 jz smc_loop_not_ch2
 
                     push ax
@@ -151,7 +152,7 @@ sound_mute_channels:
 
 # ax : song state pointer
 # dl : channel
-sound_unmute_channel:
+cygnals_unmute_channel:
 
     push di
     push si
@@ -174,36 +175,21 @@ sound_unmute_channel:
     # clear muted flag
     and byte ptr [si + CHANNEL_FLAGS], ~CHAN_FLAG_MUTED
 
-    # restore wavetable
-    mov al, [si + CHANNEL_WAVETABLE_NUM]
-    call sound_wavetable_change
-
-    # restore noise control value
-    mov [di + MUSIC_STATE_NOISE_MODE], al
-    out WS_SOUND_NOISE_CTRL_PORT, al
-
     # is this channel 4?
     # restore noise mode value in sound control register
-    test dl, 0x3
+    cmp dl, 0x3
     jnz sunmc_not_ch4
 
-        # get current register value
-        in al, WS_SOUND_CH_CTRL_PORT
-        and al, ~WS_SOUND_CH_CTRL_CH4_NOISE
-
-        # should noise be on?
-        test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_NOISE_ON
-        jz sunmc_noise_off
-
-            or al, WS_SOUND_CH_CTRL_CH4_NOISE
-
-        sunmc_noise_off:
-
-        # update register
-        out WS_SOUND_CH_CTRL_PORT, al
+        # restore noise control value
+        mov al, [di + MUSIC_STATE_NOISE_MODE]
+        call sound_noise_mode_change
 
     sunmc_not_ch4:
 
+    # restore wavetable
+    mov al, [si + CHANNEL_WAVETABLE_NUM]
+    call sound_wavetable_change
+    
     pop es
     pop si
     pop di
@@ -211,7 +197,7 @@ sound_unmute_channel:
     IA16_RET
 
 # ax : song state pointer
-sound_unmute_all:
+cygnals_unmute_all:
 
     push di
     push si
@@ -246,23 +232,12 @@ sound_unmute_all:
 
             # is this channel 4?
             # restore noise mode value in sound control register
-            test byte ptr [si + CHANNEL_NUMBER], 0x3
+            cmp byte ptr [si + CHANNEL_NUMBER], 0x3
             jnz sunmac_not_ch4
 
-                # get current register value
-                in al, WS_SOUND_CH_CTRL_PORT
-                and al, ~WS_SOUND_CH_CTRL_CH4_NOISE
-
-                # should noise be on?
-                test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_NOISE_ON
-                jz sunmac_noise_off
-
-                    or al, WS_SOUND_CH_CTRL_CH4_NOISE
-
-                sunmac_noise_off:
-
-                # update register
-                out WS_SOUND_CH_CTRL_PORT, al
+                # restore noise control value
+                mov al, [di + MUSIC_STATE_NOISE_MODE]
+                call sound_noise_mode_change
 
             sunmac_not_ch4:
 
@@ -272,10 +247,6 @@ sound_unmute_all:
         add si, CHANNEL_SIZE
         
         loopnz suall_loop
-
-    # restore noise control value
-    mov [di + MUSIC_STATE_NOISE_MODE], al
-    out WS_SOUND_NOISE_CTRL_PORT, al
 
     pop es
     pop si

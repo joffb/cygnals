@@ -9,7 +9,7 @@ WONDERFUL_TOOLCHAIN ?= /opt/wonderful
 
 NAME		:= cygnals
 DESTDIR		?= $(WONDERFUL_TOOLCHAIN)/local/$(NAME)
-TARGET		?= wswan/medium wswan/medium-sram wswan/small wswan/small-sram
+TARGET		?= wswan/medium wswan/medium-sram wswan/small wswan/small-sram wwitch
 
 ifeq (1,$(words [$(TARGET)]))
 include $(WONDERFUL_TOOLCHAIN)/target/$(TARGET)/makedefs.mk

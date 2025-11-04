@@ -9,24 +9,25 @@
 .arch i186
 .intel_syntax noprefix
 
-.global sound_enable_looping
-.global sound_disable_looping
+.global cygnals_enable_looping
+.global cygnals_disable_looping
 
 .section .fartext.sound_driver, "ax"
 
+
 # ax - song state
-sound_enable_looping:
+cygnals_enable_looping:
 
     mov bx, ax
-    or byte ptr [bx + MUSIC_STATE_FLAGS], STATE_FLAG_LOOP
+    or byte ptr [bx + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_LOOP
 
     IA16_RET
 
 # ax - song state
-sound_disable_looping:
+cygnals_disable_looping:
 
     mov bx, ax
-    and byte ptr [bx + MUSIC_STATE_FLAGS], ~STATE_FLAG_LOOP
+    and byte ptr [bx + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_LOOP
 
     IA16_RET
 

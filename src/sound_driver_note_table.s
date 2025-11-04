@@ -10,6 +10,7 @@
 
 .section .fartext.sound_driver, "ax"
 
+
 sound_note_table:
 # note 24
 .short 88

@@ -43,7 +43,7 @@ void main(void) {
 	// attempt to set colour mode
 	ws_system_set_mode(WS_MODE_COLOR_4BPP);
 
-	//sound_set_wavetable_ram_address((unsigned char *)0xf00);
+	//cygnals_set_wavetable_ram_address((unsigned char *)0xf00);
 
 	// mono gfx, set black color
 	outportw(WS_SCR_PAL_0_PORT, WS_DISPLAY_MONO_PALETTE(1, 7, 3, 0));
@@ -57,8 +57,6 @@ void main(void) {
 	outportb(WS_SCR2_SCRL_X_PORT, 0);
 	outportb(WS_SCR2_SCRL_Y_PORT, 0);
 
-	screen_1[0] = 0;
-
 	// enable just screen_1
 	outportw(WS_DISPLAY_CTRL_PORT, WS_DISPLAY_CTRL_SCR1_ENABLE);
 
@@ -67,8 +65,8 @@ void main(void) {
 	// colors 7,3,1,0 used by UI
 	ws_display_set_shade_lut(WS_DISPLAY_SHADE_LUT(0, 2, 4, 6, 12, 13, 14, 15));
 
-	sound_play(ptr, &song_state, song_channels);
-	//sound_disable_looping();
+	cygnals_play(ptr, &song_state, song_channels);
+	//cygnals_disable_looping();
 	
 	// acknowledge interrupt
 	outportb(WS_INT_ACK_PORT, 0xFF);
@@ -88,19 +86,19 @@ void main(void) {
 
 		vblank_fired = 0;
 
-		sound_update(&song_state);
+		cygnals_update(&song_state);
 
 		// is there an sfx playing?
-		if (sfx_state.flags & STATE_FLAG_PLAYING)
+		if (sfx_state.flags & CYG_STATE_FLAG_PLAYING)
 		{
 			// update it
-			sound_update(&sfx_state);
+			cygnals_update(&sfx_state);
 
 			// is the sfx no longer playing?
-			if (!(sfx_state.flags & STATE_FLAG_PLAYING))
+			if (!(sfx_state.flags & CYG_STATE_FLAG_PLAYING))
 			{
 				// unmute all muted channels
-				sound_unmute_all(&song_state);
+				cygnals_unmute_all(&song_state);
 			}
 		}
 
@@ -112,11 +110,11 @@ void main(void) {
 
 		if (keypad_pushed & WS_KEY_X1)
 		{
-			sound_set_master_volume(&song_state, song_state.master_volume + 4);
+			cygnals_set_master_volume(&song_state, song_state.master_volume + 4);
 		}
 		else if (keypad_pushed & WS_KEY_X3)
 		{
-			sound_set_master_volume(&song_state, song_state.master_volume - 4);
+			cygnals_set_master_volume(&song_state, song_state.master_volume - 4);
 		}
 
 		
@@ -124,18 +122,18 @@ void main(void) {
 		{
 			if (song_state.flags & 0x8)
 			{
-				sound_stop(&song_state);
+				cygnals_stop(&song_state);
 			}
 			else
 			{
-				sound_resume(&song_state);
+				cygnals_resume(&song_state);
 			}
 		}
 
 		if (keypad_pushed & WS_KEY_B)
 		{
-			sound_play(sfx_test, &sfx_state, sfx_channels);
-			sound_mute_channels(&song_state, sound_get_channels(&sfx_state));
+			cygnals_play(sfx_test, &sfx_state, sfx_channels);
+			cygnals_mute_channels(&song_state, cygnals_get_channels(&sfx_state));
 		}
 
 
@@ -143,46 +141,52 @@ void main(void) {
 		{
 			if (song_channels[0].flags & 0x1)
 			{
-				sound_unmute_channel(&song_state, 0);
+				cygnals_unmute_channel(&song_state, 0);
 			}
 			else
 			{
-				sound_mute_channel(&song_state, 0);
+				cygnals_mute_channel(&song_state, 0);
 			}
 		}			
 		if (keypad_pushed & WS_KEY_Y2)
 		{
 			if (song_channels[1].flags & 0x1)
 			{
-				sound_unmute_channel(&song_state, 1);
+				cygnals_unmute_channel(&song_state, 1);
 			}
 			else
 			{
-				sound_mute_channel(&song_state, 1);
+				cygnals_mute_channel(&song_state, 1);
 			}
 		}
 		if (keypad_pushed & WS_KEY_Y3)
 		{
 			if (song_channels[2].flags & 0x1)
 			{
-				sound_unmute_channel(&song_state, 2);
+				cygnals_unmute_channel(&song_state, 2);
 			}
 			else
 			{
-				sound_mute_channel(&song_state, 2);
+				cygnals_mute_channel(&song_state, 2);
 			}
 		}
 		if (keypad_pushed & WS_KEY_Y4)
 		{
 			if (song_channels[3].flags & 0x1)
 			{
-				sound_unmute_channel(&song_state, 3);
+				cygnals_unmute_channel(&song_state, 3);
 			}
 			else
 			{
-				sound_mute_channel(&song_state, 3);
+				cygnals_mute_channel(&song_state, 3);
 			}
 		}	
 		
+		// show whether the song channels are muted or playing
+		screen_1[0] = ((song_channels[0].flags & 1) ? 'M' : 'P') - 32 + 160;
+		screen_1[1] = ((song_channels[1].flags & 1) ? 'M' : 'P') - 32 + 160;
+		screen_1[2] = ((song_channels[2].flags & 1) ? 'M' : 'P') - 32 + 160;
+		screen_1[3] = ((song_channels[3].flags & 1) ? 'M' : 'P') - 32 + 160;
+
 	}
 }

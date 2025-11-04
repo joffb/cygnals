@@ -8,12 +8,12 @@ const fs = require('fs');
 
 var common_defines = [
     [
-        { name: "STATE_FLAG_PROCESS_NEW_LINE", value: 0x01 },
-        { name: "STATE_FLAG_LOOP", value: 0x02 },
-        { name: "STATE_FLAG_SFX", value: 0x04 },
-        { name: "STATE_FLAG_PLAYING", value: 0x08 },
-        { name: "STATE_FLAG_SAMPLE_PLAYING", value: 0x10 },
-        { name: "STATE_FLAG_NOISE_ON", value: 0x20 },
+        { name: "CYG_STATE_FLAG_PROCESS_NEW_LINE", value: 0x01 },
+        { name: "CYG_STATE_FLAG_LOOP", value: 0x02 },
+        { name: "CYG_STATE_FLAG_SFX", value: 0x04 },
+        { name: "CYG_STATE_FLAG_PLAYING", value: 0x08 },
+        { name: "CYG_STATE_FLAG_SAMPLE_PLAYING", value: 0x10 },
+        { name: "CYG_STATE_FLAG_NOISE_ON", value: 0x20 },
     ],
 ];
 
@@ -79,10 +79,7 @@ var asm_defines = [
         { name: "CHAN_FLAG2_VOLUME_CHANGE", value: 0x80 },
     ],
     [
-        { name: "BANJO_MAGIC_BYTE", value: 0xba },
-    ],
-    [
-        { name: "WAVETABLE_WRAM", value: 0xec0}
+        { name: "CYG_MAGIC_BYTE", value: 0xba },
     ]
 ];
 
@@ -258,23 +255,23 @@ for (let i = 0; i < structs.length; i++)
 
 // variables and functions
 let c_definitions = [
-    "void sound_play(const unsigned char __far *song, music_state_t *song_state, channel_t *song_channels);",
-    "void sound_update(music_state_t *song_state);",
-    "void sound_stop(music_state_t *song_state);",
-    "void sound_resume(music_state_t *song_state);",
+    "void cygnals_play(const unsigned char __far *song, music_state_t *song_state, channel_t *song_channels);",
+    "void cygnals_update(music_state_t *song_state);",
+    "void cygnals_stop(music_state_t *song_state);",
+    "void cygnals_resume(music_state_t *song_state);",
     "",
-    "unsigned char sound_get_channels(music_state_t *song_state);",
-    "void sound_mute_channel(music_state_t *song_state, unsigned char channel);",
-    "void sound_mute_channels(music_state_t *song_state, unsigned char channels);",
-    "void sound_unmute_channel(music_state_t *song_state, unsigned char channel);",
-    "void sound_unmute_all(music_state_t *song_state);",
+    "unsigned char cygnals_get_channels(music_state_t *song_state);",
+    "void cygnals_mute_channel(music_state_t *song_state, unsigned char channel);",
+    "void cygnals_mute_channels(music_state_t *song_state, unsigned char channels);",
+    "void cygnals_unmute_channel(music_state_t *song_state, unsigned char channel);",
+    "void cygnals_unmute_all(music_state_t *song_state);",
     "",
-    "void sound_set_master_volume(music_state_t *song_state, unsigned char volume);",
+    "void cygnals_set_master_volume(music_state_t *song_state, unsigned char volume);",
     "",
-    "void sound_enable_looping(music_state_t *song_state);",
-    "void sound_disable_looping(music_state_t *song_state);",
+    "void cygnals_enable_looping(music_state_t *song_state);",
+    "void cygnals_disable_looping(music_state_t *song_state);",
     "",
-    "void sound_set_wavetable_ram_address(unsigned char *address);"
+    "void cygnals_set_wavetable_ram_address(unsigned char *address);"
 ];
 
 for (let i = 0; i < c_definitions.length; i++)
@@ -303,6 +300,12 @@ for (let i = 0; i < asm_defines.length; i++)
 
     fs.writeSync(out_sdas, "\n");
 }
+
+fs.writeSync(out_sdas, "\t#ifdef __WONDERFUL_WWITCH\n")
+fs.writeSync(out_sdas, "\t\t#define WAVETABLE_WRAM 0x180\n")
+fs.writeSync(out_sdas, "\t#else\n")
+fs.writeSync(out_sdas, "\t\t#define WAVETABLE_WRAM 0xec0\n")
+fs.writeSync(out_sdas, "\t#endif\n\n")
 
 // write out asm structs
 for (let i = 0; i < structs.length; i++)

@@ -9,13 +9,14 @@
 .arch i186
 .intel_syntax noprefix
 
-.global sound_update
+.global cygnals_update
 .global sound_update_change_pattern
 
 .section .fartext.sound_driver, "ax"
 
+
 # ax - song state
-sound_update:
+cygnals_update:
 
     push es
     push ds
@@ -25,7 +26,7 @@ sound_update:
     mov di, ax
 
     # check playing flag, we're done if it's not set
-    test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_PLAYING
+    test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_PLAYING
     jz sound_update_done
 
     # es = song segment
@@ -67,7 +68,7 @@ sound_update:
             mut_speed_picked:
         
             # set signal that we need to process the next line
-            or byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_PROCESS_NEW_LINE
+            or byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_PROCESS_NEW_LINE
 
             jmp music_update_tics_done
 
@@ -95,14 +96,14 @@ sound_update:
                 call sound_update_change_pattern
 
                 # is this song looping?
-                test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_LOOP
+                test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_LOOP
                 jnz music_update_tics_done
 
                     # clear playing flag
-                    and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_PLAYING
+                    and byte ptr [di + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_PLAYING
 
                     # for sfx, don't mute all channels
-                    test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_SFX
+                    test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SFX
                     jnz sound_update_done
 
                         # not looping
@@ -148,7 +149,7 @@ sound_update:
                 loopnz muc_channels_loop
 
 			# clear signal that we need to process the next line
-			and byte ptr [di + MUSIC_STATE_FLAGS], ~STATE_FLAG_PROCESS_NEW_LINE
+			and byte ptr [di + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_PROCESS_NEW_LINE
 
     sound_update_done:
 
@@ -181,7 +182,7 @@ sound_update_channel:
     suc_no_tic_wait:
 
     # has a new line been reached?
-    test byte ptr [di + MUSIC_STATE_FLAGS], STATE_FLAG_PROCESS_NEW_LINE
+    test byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_PROCESS_NEW_LINE
     jz suc_same_line
 
         call sound_update_new_line
