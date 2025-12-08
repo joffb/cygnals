@@ -45,6 +45,22 @@ sound_calc_sample_voice_volume:
     
     mov al, [si + CHANNEL_VOLUME]
 
+	# volume macro level if present
+	test ch, CHAN_FLAG2_VOLUME_MACRO
+	jz scsvv_no_volume_macro
+
+        # keep current volume in dl
+        mov dl, al
+
+		call sound_update_volume_macro
+
+        # scale volume by macro level
+        inc al
+        mul dl
+        shr al, 4
+
+	scsvv_no_volume_macro:
+
     # check if master volume > 0x80
     mov cl, [di + MUSIC_STATE_MASTER_VOLUME]
     test cl, 0x80
