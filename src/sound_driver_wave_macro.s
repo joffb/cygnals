@@ -18,14 +18,15 @@
 # al: wavetable number
 sound_wavetable_change:
 
+	# store latest wavetable num
+	mov [si + CHANNEL_WAVETABLE_NUM], al
+
     # don't change wavetable if channel is currently muted
     test byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
     jnz swc_muted
 
 	push bp
 	push si
-
-	mov [si + CHANNEL_WAVETABLE_NUM], al
 
     # get address of wave ram for this channel into bx
     mov dl, [si + CHANNEL_NUMBER]

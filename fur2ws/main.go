@@ -95,6 +95,7 @@ func write_macros(outfile *os.File, macros []furnace2go.Macro, song_prefix strin
 	for i, macro := range macros {
 	
 		var macro_loop uint8
+		var macro_length uint8
 		
 		// ensure loop length makes sense
 		if (macro.Loop != 0xff) && (macro.Loop >= macro.Length) {
@@ -102,9 +103,21 @@ func write_macros(outfile *os.File, macros []furnace2go.Macro, song_prefix strin
 		} else {
 			macro_loop = macro.Loop
 		}
-		
+
+		// scale and offset loop position
+		if macro_loop != 0xff {
+			macro_loop = (macro_loop * macro.Speed) + macro.Delay
+		}
+
+		// if there's a delay it sort of counts as the first step and its length isn't scaled
+		if macro.Delay > 0 {
+			macro_length = macro.Delay + ((macro.Length - 1) * macro.Speed)
+		} else {
+			macro_length = macro.Length * macro.Speed
+		}
+
 		outfile.WriteString(song_prefix + "_" + macro_prefix + "_macro_" + fmt.Sprint(i) + ":\n")
-		outfile.WriteString("\t.byte " + fmt.Sprint(macro.Length) + " # length\n")
+		outfile.WriteString("\t.byte " + fmt.Sprint(macro_length) + " # length\n")
 		outfile.WriteString("\t.byte " + fmt.Sprint(macro_loop) + " # loop\n")
 		outfile.WriteString("\t.byte " + fmt.Sprint(macro.Data[macro.Length - 1].(uint8)) + " # last\n")
 		outfile.WriteString("\t.byte 0xff # pad\n")
@@ -122,9 +135,36 @@ func write_macro_data(outfile *os.File, macros []furnace2go.Macro, song_prefix s
 	outfile.WriteString(song_prefix + "_" + macro_prefix + "_macro_data:\n")
 	
 	for i, macro := range macros {
+
+		var d uint8
 		
+		var j int
+		var j_start int = 0
+
+		var out []any = []any{}
+
+		// macro delay
+		if macro.Delay > 0 {
+
+			for d = 0; d < macro.Delay; d++ {
+				out = append(out, macro.Data[0]) 
+			}
+
+			j_start = 1;
+		}
+
+		// macro data
+		for j = j_start; j < len(macro.Data); j++ {
+
+			// repeat each step macro.Speed times
+			for d = 0; d < macro.Speed; d++ {
+				out = append(out, macro.Data[j])
+			}
+
+		}
+
 		outfile.WriteString(song_prefix + "_" + macro_prefix + "_macro_data_" + fmt.Sprint(i) + ":\n")
-		outfile.WriteString(fmt.Sprintf("\t.byte " + strings.Trim(strings.Replace(fmt.Sprintf("%d", macro.Data), " ", ", ", -1 ), "[]") + "\n"))
+		outfile.WriteString(fmt.Sprintf("\t.byte " + strings.Trim(strings.Replace(fmt.Sprintf("%d", out), " ", ", ", -1 ), "[]") + "\n"))
 	}
 	
 	outfile.WriteString("\n")
