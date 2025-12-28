@@ -139,7 +139,7 @@ void cygnals_set_wavetable_ram_address(unsigned char *address);
 
 	#define CYG_MAGIC_BYTE 0xba
 
-	#ifdef __WONDERFUL_WWITCH
+	#ifdef __WONDERFUL_WWITCH__
 		#define WAVETABLE_WRAM 0x180
 	#else
 		#define WAVETABLE_WRAM 0xec0

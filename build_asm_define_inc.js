@@ -301,7 +301,7 @@ for (let i = 0; i < asm_defines.length; i++)
     fs.writeSync(out_sdas, "\n");
 }
 
-fs.writeSync(out_sdas, "\t#ifdef __WONDERFUL_WWITCH\n")
+fs.writeSync(out_sdas, "\t#ifdef __WONDERFUL_WWITCH__\n")
 fs.writeSync(out_sdas, "\t\t#define WAVETABLE_WRAM 0x180\n")
 fs.writeSync(out_sdas, "\t#else\n")
 fs.writeSync(out_sdas, "\t\t#define WAVETABLE_WRAM 0xec0\n")
