@@ -41,6 +41,12 @@
 
 
 # return sound channel 2 voice volume
+# ds - ram segment
+# es - song segment
+# di - song header pointer
+# si - channel pointer
+#
+# cx - channel flags
 sound_calc_sample_voice_volume:
     
     mov al, [si + CHANNEL_VOLUME]
@@ -206,6 +212,7 @@ sound_sample_note_on:
         
         # mono mode, using interrupts
         push bx
+        push cx
 
         # sample number is in ah
         # look up sample 
@@ -253,16 +260,11 @@ sound_sample_note_on:
         ssno_mono_sample_rate_ok:
 
         # get segment of sample
-        mov ax, es:[bx + SAMPLE_TABLE_DATA_PTR]
-        shr ax, 4
-        mov ch, es:[bx + SAMPLE_TABLE_DATA_PTR + 2]
-        shl ch, 4
-        or ah, ch
+        mov ax, es:[bx + SAMPLE_TABLE_DATA_PTR + 2]
         mov [sound_sample_segment], ax
 
         # get address of start of sample within segment
         mov ax, es:[bx + SAMPLE_TABLE_DATA_PTR]
-        and ax, 0x000f
         mov [sound_sample_start], ax
         mov [sound_sample_ptr], ax
 
@@ -284,6 +286,8 @@ sound_sample_note_on:
         out WS_SOUND_CH_CTRL_PORT, al
 
         # set ch2 voice volume
+        # get flags into cx
+        mov cx, [si + CHANNEL_FLAGS]
         call sound_calc_sample_voice_volume
         out WS_SOUND_VOICE_VOL_PORT, al
 
@@ -301,8 +305,8 @@ sound_sample_note_on:
         add bx, bx
 
         # set interrupt vector address and segment
-        mov word ptr [bx], offset sound_sample_update_interrupt
-        mov word ptr [bx + 2], cs
+        mov word ptr ss:[bx], offset sound_sample_update_interrupt
+        mov word ptr ss:[bx + 2], cs
 
         # turn sdma rates into hblank counter rates
         # invert rates and mask off upper bits
@@ -327,6 +331,7 @@ sound_sample_note_on:
         # set sample playing flag
         or byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
 
+        pop cx
         pop bx
 
         ret
@@ -335,6 +340,7 @@ sound_sample_note_on:
 
         # colour mode, using sdma
         push bx
+        push cx
 
         # sample number is in ah
         # look up sample 
@@ -344,10 +350,29 @@ sound_sample_note_on:
         mov bx, ax
         add bx, es:[SONG_HEADER_SAMPLE_TABLE_PTR]
 
-        # output SDMA sound_instrument_change
+        # calculate sample's linear address
+
+        # get address
         mov ax, es:[bx + SAMPLE_TABLE_DATA_PTR]
+
+        # get segment
+        mov cx, es:[bx + SAMPLE_TABLE_DATA_PTR + 2]
+        
+        # shift segment left 4 and add to address
+        shl cx, 4
+        add ax, cx
+
+        # output lower 2 bytes of address
         out WS_SDMA_SOURCE_L_PORT, ax
-        mov al, es:[bx + SAMPLE_TABLE_DATA_PTR + 2]
+
+        # upper 4 bits of segment shifted right 4 + carry from previous addition
+        mov al, 0
+        adc al, 0
+        mov ch, es:[bx + SAMPLE_TABLE_DATA_PTR + 3]
+        shr ch, 4
+        add al, ch
+
+        # output upper byte of address
         out WS_SDMA_SOURCE_H_PORT, al
 
         # output SDMA length
@@ -366,12 +391,15 @@ sound_sample_note_on:
         out WS_SOUND_CH_CTRL_PORT, al
 
         # set ch2 voice volume
+        # get flags into cx
+        mov cx, [si + CHANNEL_FLAGS]
         call sound_calc_sample_voice_volume
         out WS_SOUND_VOICE_VOL_PORT, al
 
         # set sample playing flag
         or byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_SAMPLE_PLAYING
 
+        pop cx
         pop bx
 
         ret

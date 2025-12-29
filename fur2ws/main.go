@@ -1093,7 +1093,11 @@ func main() {
         sample := song.Samples[i]
 
 		outfile.WriteString(song_prefix + "_sample_" + fmt.Sprint(i) + ":\n")
-        outfile.WriteString("\t.long " + song_prefix + "_sample_data_" + fmt.Sprint(i) + "\n")
+
+        outfile.WriteString("\t.word " + song_prefix + "_sample_data_" + fmt.Sprint(i) + "\n")
+		outfile.WriteString("\t.reloc ., R_386_SEG16, \"" + song_prefix + "_sample_data_" + fmt.Sprint(i) + "!\"\n")
+		outfile.WriteString("\t.word 0\n")
+
         outfile.WriteString("\t.long " + fmt.Sprint(sample.Length) + "\n")
 
         sample_flags := "WS_SDMA_CTRL_ENABLE"
