@@ -37,6 +37,15 @@
 
     sound_sample_flags: .byte 0
 
+    #ifdef __WONDERFUL_WWITCH__
+        sound_sample_irq_vector:
+            sound_sample_irq_offset: .word 0
+            sound_sample_irq_segment: .word 0
+            sound_sample_irq_data_segment: .word 0
+            sound_sample_irq_unknown: .word 0
+    #endif
+
+
 .section .fartext.sound_driver, "ax"
 
 
@@ -152,7 +161,11 @@ sound_sample_update_interrupt:
             pop es
             pop ds
 
+            #ifndef __WONDERFUL_WWITCH__
             iret
+            #else
+            retf
+            #endif
 
         ssu_int_looping:
 
@@ -174,7 +187,11 @@ sound_sample_update_interrupt:
             pop es
             pop ds
 
+            #ifndef __WONDERFUL_WWITCH__
             iret
+            #else
+            retf
+            #endif
 
     ssu_int_not_end:
 
@@ -191,7 +208,11 @@ sound_sample_update_interrupt:
         pop es
         pop ds
 
+        #ifndef __WONDERFUL_WWITCH__
         iret
+        #else
+        retf
+        #endif
 
 # bx - command pointer
 # ds - ram segment
@@ -291,22 +312,53 @@ sound_sample_note_on:
         call sound_calc_sample_voice_volume
         out WS_SOUND_VOICE_VOL_PORT, al
 
-        # set interrupt vector
-        # get vector address for hblank timer repeat into bx
-        # vector number in al
-        in al, WS_INT_VECTOR_PORT
-        and al, 0xf8
-        add al, WS_INT_HBL_TIMER
+        #ifndef __WONDERFUL_WWITCH__
 
-        # bx = vector number * 4
-        mov bl, al
-        xor bh, bh
-        add bx, bx
-        add bx, bx
+            # set interrupt vector
+            # get vector address for hblank timer repeat into bx
+            # vector number in al
+            in al, WS_INT_VECTOR_PORT
+            and al, 0xf8
+            add al, WS_INT_HBL_TIMER
 
-        # set interrupt vector address and segment
-        mov word ptr ss:[bx], offset sound_sample_update_interrupt
-        mov word ptr ss:[bx + 2], cs
+            # bx = vector number * 4
+            mov bl, al
+            xor bh, bh
+            add bx, bx
+            add bx, bx
+
+            # set interrupt vector address and segment
+            mov word ptr ss:[bx], offset sound_sample_update_interrupt
+            mov word ptr ss:[bx + 2], cs
+
+        #else
+
+            push dx
+
+            # set hblank timer interrupt vector using freyabios
+
+            # set up irq vector table
+            mov ax, offset sound_sample_update_interrupt
+            mov [sound_sample_irq_offset], ax
+            mov ax, cs
+            mov [sound_sample_irq_segment], ax
+            mov ax, ds
+            mov [sound_sample_irq_data_segment], ax
+
+            # pointer to irq vector table in ds:bx            
+            mov bx, offset sound_sample_irq_vector
+            mov dx, bx
+
+            # al is the interrupt number
+            # ah is set interrupt mode
+            mov al, WS_INT_HBL_TIMER
+            mov ah, 0
+
+            int 0x17
+
+            pop dx
+
+        #endif
 
         # turn sdma rates into hblank counter rates
         # invert rates and mask off upper bits
@@ -437,6 +489,7 @@ sound_sample_note_off:
         # acknowledge interrupt
         mov al, WS_INT_ACK_HBL_TIMER
         out WS_INT_ACK_PORT, al
+
 
         # set ch2 volume/sample to 0
         xor al, al
