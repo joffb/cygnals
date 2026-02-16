@@ -20,6 +20,7 @@ extern const unsigned char __wf_rom sfx_test[];
 
 __attribute__((section(".iramx_screen.1"))) uint16_t screen_1[32*32];
 __attribute__((section(".iramx_screen.2"))) uint16_t screen_2[32*32];
+__attribute__((section(".iramx_wave"))) ws_sound_wavetable_t wave_ram;
 
 volatile uint8_t vblank_fired;
 
@@ -43,7 +44,8 @@ void main(void) {
 	// attempt to set colour mode
 	ws_system_set_mode(WS_MODE_COLOR_4BPP);
 
-	//cygnals_set_wavetable_ram_address((unsigned char *)0xf00);
+    // set the location of wavetable ram
+    cygnals_set_wavetable_ram_address((unsigned char ws_iram *) &wave_ram);
 
 	// mono gfx, set black color
 	outportw(WS_SCR_PAL_0_PORT, WS_DISPLAY_MONO_PALETTE(1, 7, 3, 0));
@@ -76,6 +78,8 @@ void main(void) {
 
 	// enable wonderswan vblank interrupt
 	ws_int_enable(WS_INT_ENABLE_VBLANK);
+
+
 
 	// enable cpu interrupts
 	ia16_enable_irq();
