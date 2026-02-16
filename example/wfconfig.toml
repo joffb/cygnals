@@ -12,10 +12,3 @@ vertical = false
 # rom_speed = 1
 # rom_bus_width = 16
 
-[memory.layout]
-irq_vectors = [ 0x0000, 0x003F ]
-c_heap = [ 0x0040, 0x0EBF ]
-wave = [ 0x0EC0, 0x0EFF ]
-screen1 = [ 0x1000, 0x17FF ]
-screen2 = [ 0x1800, 0x1FFF ]
-sprites = [ 0x2E00, 0x2FFF ]
