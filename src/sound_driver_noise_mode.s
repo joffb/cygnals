@@ -11,7 +11,11 @@
 
 .global sound_noise_mode_change
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 # al : noise mode
 sound_noise_mode_change:
@@ -21,7 +25,7 @@ sound_noise_mode_change:
     jnz snmc_noise_on
 
         # clear ch4 noise bit
-        in al, WS_SOUND_CH_CTRL_PORT 
+        in al, WS_SOUND_CH_CTRL_PORT
         and al, ~WS_SOUND_CH_CTRL_CH4_NOISE
 
         # update noise flag in state
@@ -40,7 +44,7 @@ sound_noise_mode_change:
 
     # noise mode > 0
     snmc_noise_on:
-        
+
         # get noise tap value with noise enable bit
         # and reset lsfr while we're here
         dec al
@@ -55,7 +59,7 @@ sound_noise_mode_change:
         jnz snmc_on_muted
 
             # output to sound control port
-            
+
             # set ch4 noise bit
             in al, WS_SOUND_CH_CTRL_PORT
             or al, WS_SOUND_CH_CTRL_CH4_NOISE

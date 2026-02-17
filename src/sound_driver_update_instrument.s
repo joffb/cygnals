@@ -11,7 +11,11 @@
 
 .global sound_instrument_change
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 sound_instrument_change:
 
@@ -69,7 +73,7 @@ sound_instrument_change:
     # 0xff means don't change wave
     cmp al, 0xff
     jz sui_no_wave_change
-    
+
         # is this wave already in use?
         cmp al, [si + CHANNEL_WAVETABLE_NUM]
         jz sui_no_wave_change

@@ -11,8 +11,11 @@
 
 .global sound_update_arp_macro
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
-
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 sound_update_arp_macro:
 
@@ -38,7 +41,7 @@ sound_update_arp_macro:
 	# macro_pos == macro_len ?
 	cmp al, dl
 	jz suam_macro_end
-		
+
 		# get pointer to macro
 		mov bx, es:[bx + MACRO_DATA_PTR]
 		add bx, ax
@@ -52,21 +55,21 @@ sound_update_arp_macro:
 		pop bx
 
 		ret
-		
+
 	# end reached
 	suam_macro_end:
 
 		# 0xff means there's no loop
 		cmp dh, 0xff
 		jz suam_macro_no_loop
-		
+
 			# current pos = loop
 			mov al, dh
 
 			# get pointer to macro
 			mov bx, es:[bx + MACRO_DATA_PTR]
 			add bx, ax
-			
+
 			# get new value
 			mov al, es:[bx]
 
@@ -79,12 +82,10 @@ sound_update_arp_macro:
 			ret
 
 		suam_macro_no_loop:
-		
+
 			# get last value
 			mov al, es:[bx + MACRO_LAST]
 
 			pop bx
 
 			ret
-
-

@@ -11,8 +11,11 @@
 
 .global sound_update_vibrato
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
-
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 sound_update_vibrato:
 
@@ -26,12 +29,12 @@ sound_update_vibrato:
 	mov dl, ah
 	and ah, 0xf
 	add ah, al
-	and ah, 0x3f	
+	and ah, 0x3f
 	mov [si + CHANNEL_ARP_VIB_POS], ah
 
 	# turning the 0-63 range of the counter
 	# into a 0-15 range, depending on the quadrant
-	
+
 	# keep full value in ah to test against
 	# restrict al to 0-15
 	mov al, ah
@@ -72,7 +75,7 @@ sound_update_vibrato:
     pop bx
 
 	# return value in ax
-	
+
 	ret
 
 # quarter of sine table
@@ -98,7 +101,7 @@ music_vibrato_table:
 
 
 # following code is not in use
-# didn't seem much faster 
+# didn't seem much faster
 # despite using about 768 extra bytes
 
 /*
@@ -115,7 +118,7 @@ sound_update_vibrato_full:
 	mov dl, al
 	and al, 0xf
 	add al, [si + CHANNEL_VIBRATO_COUNTER]
-	and al, 0x3f	
+	and al, 0x3f
 	mov [si + CHANNEL_VIBRATO_COUNTER], al
 
 	# get vibrato table row using the depth << 2
@@ -137,16 +140,16 @@ sound_update_vibrato_full:
     pop bx
 
 	# return value in ax
-	
+
 	ret
 
 */
 
 /*
 define = ""
-for (i = 0; i < 16; i++) { 
-    out = []; 
-    for (j = 0; j < 64; j++) { 
+for (i = 0; i < 16; i++) {
+    out = [];
+    for (j = 0; j < 64; j++) {
         out.push(Math.floor(Math.sin((Math.PI/32) * j) * (i + 1) * 2));
     }
     define += "\t.byte " + out.join(",") + "\n";

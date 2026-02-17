@@ -11,7 +11,11 @@
 
 .global sound_update_channel_volume
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 
 # ds - ram segment

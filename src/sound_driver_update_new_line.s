@@ -12,7 +12,11 @@
 .global sunl_loop
 .global sound_update_new_line
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 
 # ds - ram segment
@@ -51,7 +55,7 @@ sound_update_new_line:
 
             # move on command pointer
             inc bx
-            
+
             # lower 7 bits is the number of lines to wait
             and al, 0x7f
             mov [si + CHANNEL_WAIT], al
@@ -68,7 +72,7 @@ sound_update_new_line:
             add bl, al
             adc bh, 0
             mov dx, cs:[bx]
-            
+
             # restore command pointer
             pop bx
 

@@ -12,7 +12,11 @@
 .global cygnals_enable_looping
 .global cygnals_disable_looping
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 
 # ax - song state
@@ -30,4 +34,3 @@ cygnals_disable_looping:
     and byte ptr [bx + MUSIC_STATE_FLAGS], ~CYG_STATE_FLAG_LOOP
 
     IA16_RET
-

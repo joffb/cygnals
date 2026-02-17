@@ -46,7 +46,11 @@
     #endif
 
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 
 # return sound channel 2 voice volume
@@ -57,7 +61,7 @@
 #
 # cx - channel flags
 sound_calc_sample_voice_volume:
-    
+
     mov al, [si + CHANNEL_VOLUME]
 
 	# volume macro level if present
@@ -119,7 +123,7 @@ sound_sample_update_interrupt:
     mov es, [sound_sample_segment]
     mov bx, [sound_sample_ptr]
 
-    # get and output next sample 
+    # get and output next sample
     mov al, es:[bx]
     out WS_SOUND_VOL_CH2_PORT, al
 
@@ -228,15 +232,15 @@ sound_sample_note_on:
 
     # running in colour mode?
     in al, WS_SYSTEM_CTRL_PORT
-    test al, WS_SYSTEM_CTRL_MODEL_COLOR 
+    test al, WS_SYSTEM_CTRL_MODEL_COLOR
     jnz ssno_colour_mode
-        
+
         # mono mode, using interrupts
         push bx
         push cx
 
         # sample number is in ah
-        # look up sample 
+        # look up sample
         mov al, ah
         mov bl, SAMPLE_TABLE_SIZE
         mul bl
@@ -345,7 +349,7 @@ sound_sample_note_on:
             mov ax, ds
             mov [sound_sample_irq_data_segment], ax
 
-            # pointer to irq vector table in ds:bx            
+            # pointer to irq vector table in ds:bx
             mov bx, offset sound_sample_irq_vector
             mov dx, bx
 
@@ -395,7 +399,7 @@ sound_sample_note_on:
         push cx
 
         # sample number is in ah
-        # look up sample 
+        # look up sample
         mov al, ah
         mov bl, SAMPLE_TABLE_SIZE
         mul bl
@@ -409,7 +413,7 @@ sound_sample_note_on:
 
         # get segment
         mov cx, es:[bx + SAMPLE_TABLE_DATA_PTR + 2]
-        
+
         # shift segment left 4 and add to address
         shl cx, 4
         add ax, cx

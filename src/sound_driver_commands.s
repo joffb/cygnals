@@ -11,7 +11,11 @@
 
 .global sunl_commands
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 
 .balign 2
@@ -74,7 +78,7 @@ sunl_note_on:
 
     test byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
     jnz sunlno_muted
-        
+
         push ax
 
         # is this ch2?
@@ -126,7 +130,7 @@ sunl_note_on:
         # set channel frequency
         mov [si + CHANNEL_FREQ], ax
 
-        # reset macros 
+        # reset macros
         xor al, al
         mov [si + CHANNEL_VOLUME_MACRO_POS], al
         mov [si + CHANNEL_WAVE_MACRO_POS], al
@@ -137,8 +141,8 @@ sunl_note_on:
 
     sunlno_has_slide_porta:
 
-        # don't reset macros 
-        # set frequency as a target 
+        # don't reset macros
+        # set frequency as a target
         mov [si + CHANNEL_TARGET_FREQ], ax
 
         jmp sunl_loop
@@ -268,7 +272,7 @@ sunl_slide_up:
     # move on command pointer
     add bx, 2
 
-    jmp sunl_loop  
+    jmp sunl_loop
 
 
 # bx - command pointer
@@ -345,7 +349,7 @@ sunl_arpeggio:
     # move on command pointer
     add bx, 2
 
-    jmp sunl_loop  
+    jmp sunl_loop
 
 
 # bx - command pointer
@@ -364,7 +368,7 @@ sunl_arpeggio_off:
     # move on command pointer
     inc bx
 
-    jmp sunl_loop  
+    jmp sunl_loop
 
 
 # bx - command pointer
@@ -385,7 +389,7 @@ sunl_vibrato:
     # move on command pointer
     add bx, 2
 
-    jmp sunl_loop  
+    jmp sunl_loop
 
 
 # bx - command pointer
@@ -404,7 +408,7 @@ sunl_vibrato_off:
     # move on command pointer
     inc bx
 
-    jmp sunl_loop  
+    jmp sunl_loop
 
 
 # bx - command pointer
@@ -480,9 +484,9 @@ sunl_sample_note_on:
     # don't do anything if channel muted
     test byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
     jnz snl_sno_muted
-        
+
         call sound_sample_note_on
-        
+
     snl_sno_muted:
 
     # move on command pointer
@@ -497,7 +501,7 @@ sunl_sample_note_on:
 # di - song header pointer
 # si - channel pointer
 sunl_sample_note_off:
-    
+
     # don't do anything if channel muted
     test byte ptr [si + CHANNEL_FLAGS], CHAN_FLAG_MUTED
     jnz snl_snoff_muted
@@ -518,7 +522,7 @@ sunl_sample_note_off:
 # si - channel pointer
 sunl_speaker_loudness:
 
-    # update loudness value 
+    # update loudness value
     mov al, ah
     or al, WS_SOUND_OUT_CTRL_HEADPHONE_ENABLE | WS_SOUND_OUT_CTRL_SPEAKER_ENABLE
     out WS_SOUND_OUT_CTRL_PORT, al

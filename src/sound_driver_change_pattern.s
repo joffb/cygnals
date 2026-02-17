@@ -11,7 +11,11 @@
 
 .global sound_update_change_pattern
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 # ds - ram segment
 # es - song segment
@@ -36,11 +40,11 @@ sound_update_change_pattern:
 
     # channel pointer in si
     mov si, [di + MUSIC_STATE_CHANNELS_PTR]
-    
+
     # sfx may have different numbers of channels
     mov cl, es:[SONG_HEADER_CHANNELS]
     shr cl, 4
-    
+
     xor ch, ch
 
     mut_order_jump_loop:

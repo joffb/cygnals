@@ -11,7 +11,11 @@
 
 .global sound_update_channel_pitch
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 
 # ds - ram segment
@@ -31,7 +35,7 @@ sound_update_channel_pitch:
     suc_no_slide:
 
         # current frequency
-        mov bx, [si + CHANNEL_FREQ] 
+        mov bx, [si + CHANNEL_FREQ]
 
         # update vibrato if needed
         test cl, CHAN_FLAG_VIBRATO
@@ -63,7 +67,7 @@ sound_update_channel_pitch:
         cbw
 
         # add to running total
-        add bx, ax      
+        add bx, ax
 
     suc_no_pitch_ex_macro:
 
@@ -73,7 +77,7 @@ sound_update_channel_pitch:
 
         # get macro val
         call sound_update_arp_macro
-        
+
         # msb set means it's absolute
         test al, 0x80
         jz suc_arp_macro_relative
@@ -90,12 +94,12 @@ sound_update_channel_pitch:
 
             jmp suc_arp_macro_done
 
-        suc_arp_macro_relative: 
-            
+        suc_arp_macro_relative:
+
             # this is a 7 bit signed number
             # shift up by 1
             shl al, 1
-            
+
             # sign extend al into ah
             cbw
 
@@ -103,7 +107,7 @@ sound_update_channel_pitch:
             shl ax, 4
 
             # add to running total
-            add bx, ax      
+            add bx, ax
 
     suc_arp_macro_done:
     suc_no_arp_macro:
@@ -122,5 +126,5 @@ sound_update_channel_pitch:
     # update pitch
     mov ax, bx
     out dx, ax
-    
+
     ret

@@ -12,7 +12,11 @@
 .global sound_update_wave_macro
 .global sound_wavetable_change
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 
 # al: wavetable number
@@ -35,10 +39,10 @@ sound_wavetable_change:
 	mov bp, [sound_wavetable_ram_ptr]
     add bp, dx
 
-    # get source address of wavetable 
+    # get source address of wavetable
     xor ah, ah
     shl ax, 4
-    add ax, es:[SONG_HEADER_WAVETABLES_PTR] 
+    add ax, es:[SONG_HEADER_WAVETABLES_PTR]
     mov si, ax
 
 	# copy wave table
@@ -61,7 +65,7 @@ sound_wavetable_change:
 
 	pop si
 	pop bp
-	
+
 	swc_muted:
     ret
 
@@ -88,7 +92,7 @@ sound_update_wave_macro:
 	# macro_pos == macro_len ?
 	cmp al, dl
 	jz wm_macro_end
-		
+
 		# get pointer to macro
 		mov bx, es:[bx + MACRO_DATA_PTR]
 		add bx, ax
@@ -100,21 +104,21 @@ sound_update_wave_macro:
 		inc byte ptr [si + CHANNEL_WAVE_MACRO_POS]
 
 		jmp suwm_done
-		
+
 	# end reached
 	wm_macro_end:
 
 		# 0xff means there's no loop
 		cmp dh, 0xff
 		jz wm_macro_no_loop
-		
+
 			# current pos = loop
 			mov al, dh
 
 			# get pointer to macro
 			mov bx, es:[bx + MACRO_DATA_PTR]
 			add bx, ax
-			
+
 			# get new value
 			mov al, es:[bx]
 
@@ -123,9 +127,9 @@ sound_update_wave_macro:
 			mov [si + CHANNEL_WAVE_MACRO_POS], dh
 
 			jmp suwm_done
-		
+
 		wm_macro_no_loop:
-		
+
 			ret
 
 	suwm_done:

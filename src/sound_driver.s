@@ -21,14 +21,18 @@
 
 sound_wavetable_ram_ptr: .word WAVETABLE_WRAM
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 cygnals_play:
 
     # get channels pointer into bx from stack
     push bp
     mov bp, sp
-    mov bx, [bp + IA16_CALL_STACK_OFFSET(2)] 
+    mov bx, [bp + IA16_CALL_STACK_OFFSET(2)]
     pop bp
 
     push es
@@ -93,7 +97,7 @@ cygnals_play:
         mov al, 1
         call sound_init_channel
         add si, CHANNEL_SIZE
-        
+
     sp_no_ch1:
 
     # init channel 2?
@@ -129,7 +133,7 @@ cygnals_play:
         # set audio output level
         mov al, 0x0f
         out WS_SOUND_OUT_CTRL_PORT, al
-        
+
         # set channel volumes
         xor al, al
         out WS_SOUND_VOL_CH1_PORT, al
@@ -180,7 +184,7 @@ cygnals_play:
 
         # restore bp
         pop bp
-        
+
     sound_play_done:
 
     popa

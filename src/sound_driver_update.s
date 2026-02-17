@@ -12,7 +12,11 @@
 .global cygnals_update
 .global sound_update_change_pattern
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 
 # ax - song state
@@ -64,9 +68,9 @@ cygnals_update:
 
                 mov al, [di + MUSIC_STATE_SPEED_2]
                 mov [di + MUSIC_STATE_TIC], al
-            
+
             mut_speed_picked:
-        
+
             # set signal that we need to process the next line
             or byte ptr [di + MUSIC_STATE_FLAGS], CYG_STATE_FLAG_PROCESS_NEW_LINE
 
@@ -140,7 +144,7 @@ cygnals_update:
             muc_channels_loop:
 
                 push cx
-                
+
                 call sound_update_channel
                 add si, CHANNEL_SIZE
 
@@ -210,7 +214,7 @@ sound_update_channel:
         # is there a wave macro?
         test ch, CHAN_FLAG2_WAVE_MACRO
         jz suc_no_wave_macro
-        
+
             call sound_update_wave_macro
 
         suc_no_wave_macro:
@@ -218,7 +222,7 @@ sound_update_channel:
         # is there a duty macro?
         test ch, CHAN_FLAG2_DUTY_MACRO
         jz suc_no_ex_macro
-        
+
             call sound_update_ex_macro
             call sound_noise_mode_change
 
@@ -239,4 +243,3 @@ sound_update_channel:
     and byte ptr [si + CHANNEL_FLAGS2], ~(CHAN_FLAG2_PITCH_CHANGED | CHAN_FLAG2_VOLUME_CHANGE)
 
     ret
-

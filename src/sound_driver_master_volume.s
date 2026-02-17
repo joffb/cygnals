@@ -11,7 +11,11 @@
 
 .global cygnals_set_master_volume
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 # ax : song state pointer
 # dl : volume

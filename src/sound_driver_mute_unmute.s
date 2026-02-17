@@ -15,7 +15,11 @@
 .global cygnals_unmute_all
 .global cygnals_mute_channels
 
+#ifdef __IA16_CMODEL_IS_FAR_TEXT
 .section .fartext.sound_driver, "ax"
+#else
+.section .text.sound_driver, "ax"
+#endif
 
 
 # ax : song_state pointer
@@ -189,7 +193,7 @@ cygnals_unmute_channel:
     # restore wavetable
     mov al, [si + CHANNEL_WAVETABLE_NUM]
     call sound_wavetable_change
-    
+
     pop es
     pop si
     pop di
@@ -245,7 +249,7 @@ cygnals_unmute_all:
 
         # move to next channel
         add si, CHANNEL_SIZE
-        
+
         loopnz suall_loop
 
     pop es
